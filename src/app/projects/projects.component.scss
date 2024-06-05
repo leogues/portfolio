@@ -1,0 +1,11 @@
+.projects {
+  max-width: 85%;
+  margin: 10rem auto 0 auto;
+
+  .project-list {
+    margin-top: 7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10rem;
+  }
+}

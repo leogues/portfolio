@@ -1,0 +1,93 @@
+@import '../../styles/colors.scss';
+@import '../../styles/font.scss';
+
+.hero {
+  display: flex;
+  height: 100%;
+  padding: 1rem;
+
+  flex: 1;
+  min-height: 0;
+
+  gap: 3rem;
+  flex-wrap: wrap-reverse;
+
+  & > * {
+    flex: 1;
+    flex-basis: 340px;
+  }
+
+  .hero-left {
+    $polygon-size: 15px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .greeting-wrapper {
+      display: flex;
+      position: relative;
+      width: max-content;
+      padding: 0.875rem 1.25rem;
+      background-color: $purple-400;
+      font-size: $fs-400;
+      font-weight: $fw-500;
+
+      .polygon {
+        position: absolute;
+        z-index: -1;
+
+        bottom: 0;
+        left: 50%;
+        right: 50%;
+        transform: translate(-50%, 97%);
+
+        width: 0;
+        height: 0;
+
+        border-top: $polygon-size solid $purple-400;
+        border-right: 10px solid transparent;
+        border-left: 10px solid transparent;
+      }
+    }
+
+    .developer-info {
+      margin-top: $polygon-size;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      h1 {
+        line-height: 1;
+        font-weight: $fw-800;
+        font-size: $fs-900;
+      }
+
+      span {
+        line-height: normal;
+        font-weight: $fw-400;
+        font-size: $fs-550;
+      }
+    }
+
+    .button-wrapper {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 1.5rem;
+
+      .btn-secondary {
+        padding: 0.875rem 1.25rem;
+      }
+    }
+  }
+
+  .hero-right {
+    display: flex;
+
+    flex-direction: column;
+    justify-content: center;
+    img {
+      mix-blend-mode: color-dodge;
+    }
+  }
+}

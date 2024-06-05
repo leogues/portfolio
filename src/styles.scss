@@ -1,1 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
+@import './styles/reset.scss';
+@import './styles/colors.scss';
+@import './styles/font.scss';
+
+body {
+  background-color: $dark-purple-400;
+  font-family: $ff-primary;
+  font-weight: $fw-400;
+  color: white;
+  padding-block-end: 5rem;
+}
+
+h2 {
+  font-size: $fs-800;
+  font-weight: $fw-700;
+  text-align: center;
+}
+
+h3 {
+  font-size: $fs-600;
+  font-weight: $fw-600;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.btn {
+  padding: 0.875rem 1.75rem;
+  border-radius: 0.375rem;
+  font-size: $fs-400;
+  font-weight: $fw-400;
+  line-height: normal;
+}
+
+.btn-primary {
+  background-color: $purple-400;
+}
+
+.btn-secondary {
+  border: 1px solid $light-grey;
+}

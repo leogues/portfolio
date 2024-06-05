@@ -1,0 +1,32 @@
+header {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding: 0.25rem;
+  max-height: 4.5rem;
+  align-items: center;
+  .heading-logo {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .heading-right {
+    display: flex;
+    gap: 2rem;
+
+    .heading-social-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      img {
+        height: 1.5rem;
+        width: 1.5rem;
+      }
+    }
+
+    .heading-navigation {
+      width: 1.5rem;
+      height: 2.25rem;
+    }
+  }
+}
