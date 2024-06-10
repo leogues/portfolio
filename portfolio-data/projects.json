@@ -2,9 +2,9 @@
   "projects": [
     {
       "id": 0,
-      "title": "Video Chat WebRTC",
+      "title": "WebRTC: Video chat app",
       "picture": "./assets/video-call-app.png",
-      "description": "A web app for visualizing personalized Spotify data. View your top artists, top tracks, recently played tracks, and detailed audio information about each track. Create and save new playlists of recommended tracks based on your existing playlists and more. ",
+      "description": "Um web app de video chat com suporte a múltiplos usuários em uma mesma sala. ",
       "isWorkInProgress": false,
       "isRelevant": true,
       "github": "https://github.com/leogues/project-webrtc",
@@ -25,8 +25,8 @@
     {
       "id": 1,
       "title": "MusicHub",
-      "picture": "./assets/video-call-app.png",
-      "description": "A web app for visualizing personalized Spotify data. View your top artists, top tracks, recently played tracks, and detailed audio information about each track. Create and save new playlists of recommended tracks based on your existing playlists and more. ",
+      "picture": "./assets/musichub.png",
+      "description": "Um web app de transferir músicas entre provedores de streaming de música.",
       "isWorkInProgress": true,
       "isRelevant": true,
       "github": "https://github.com/leogues/MusicHub",

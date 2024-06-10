@@ -1,22 +1,22 @@
 <section [ngClass]="customClass" class="project-item">
   <div class="project-content">
     <header>
-      <span>Featured Project</span>
+      <span>Projeto em destaque</span>
       <h3>{{ project().title }}</h3>
     </header>
     <article>{{ project().description }} </article>
     <div class="techs">
       @for(tech of techsInProject(); track tech) {
-      <div
+      <a [href]="tech.link" target="_blank"
         ><img
           [src]="tech.image"
           [class]="{
             'dark': tech.isDarkImage,
           }"
-          width="28"
-          height="28"
+          width="22"
+          height="22"
           alt="tech"
-      /></div>
+      /></a>
 
       }
     </div>

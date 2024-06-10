@@ -20,8 +20,9 @@
     <button class="btn show-more" (click)="toggleRelevanceFilter()">
       <span>{{ showRelevantOnly() ? 'Mostrar tudo' : 'Mostra menos' }}</span>
       <img
-        [class]="showRelevantOnly() ? 'rotate-90' : 'rotate-270'"
-        src=""
+        [class]="{ 'rotate-180': !showRelevantOnly() }"
+        width="20"
+        src="assets/arrow.png"
         alt=">"
       />
     </button>

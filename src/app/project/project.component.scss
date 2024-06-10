@@ -37,14 +37,17 @@
       flex-wrap: wrap;
       gap: 1rem;
       margin-top: 0.75rem;
-      .dark {
-        filter: invert(100%);
-      }
       img {
-        filter: grayscale(100%) contrast(100%);
+        filter: grayscale(100%) contrast(100%) brightness(125%);
         &:hover {
           filter: none;
         }
+      }
+      .dark {
+        filter: invert(100%);
+      }
+      .dark:hover {
+        filter: invert(50%);
       }
     }
 
