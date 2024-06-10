@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core'
+import { Component, computed, effect, inject, signal } from '@angular/core'
 import { TechnologyComponent } from '../technology/technology.component'
 import { CapitalizeFirstLetterPipe } from '../pipes/capitalize-first-letter.pipe'
 import { CommonModule } from '@angular/common'
@@ -21,7 +21,7 @@ export class TechnologiesComponent {
   protected technologiesListByCategory = computed(() =>
     this.groupByCategory(Object.values(this.technologiesList())),
   )
-  filteredListByCategory = computed(() =>
+  protected filteredListByCategory = computed(() =>
     this.filterByRelevance(
       this.technologiesListByCategory(),
       this.showRelevantOnly(),
@@ -29,7 +29,7 @@ export class TechnologiesComponent {
   )
 
   constructor() {
-    console.log(this.filteredListByCategory)
+    effect(() => console.log(this.technologiesList()))
   }
 
   groupByCategory(technologies: Technology[]) {

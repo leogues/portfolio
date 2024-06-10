@@ -55,10 +55,10 @@
     "link": "https://nodejs.org/",
     "isRelevant": true
   },
-  "Golang": {
-    "name": "Golang",
+  "Go": {
+    "name": "Go",
     "category": "backend",
-    "image": "./assets/techs/golang.svg",
+    "image": "./assets/techs/go.svg",
     "link": "https://golang.org/",
     "isRelevant": true
   },
