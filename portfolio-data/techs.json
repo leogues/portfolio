@@ -72,7 +72,7 @@
   "Gin": {
     "name": "Gin",
     "category": "backend",
-    "image": "./assets/techs/gin.svg",
+    "image": "./assets/techs/gin.png",
     "link": "https://gin-gonic.com/",
     "isRelevant": true
   },

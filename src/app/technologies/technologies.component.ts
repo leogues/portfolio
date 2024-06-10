@@ -16,7 +16,7 @@ type groupedTechnologies = Technology[][]
 })
 export class TechnologiesComponent {
   private techService = inject(TechService)
-  showRelevantOnly = signal<boolean>(true)
+  showRelevantOnly = signal<boolean>(false)
   protected technologiesList = this.techService.techs.data
   protected technologiesListByCategory = computed(() =>
     this.groupByCategory(Object.values(this.technologiesList())),
