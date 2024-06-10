@@ -1,0 +1,107 @@
+{
+  "HTML": {
+    "name": "HTML",
+    "category": "frontend",
+    "image": "./assets/techs/html.svg",
+    "link": "https://www.w3.org/html/",
+    "isRelevant": false
+  },
+  "CSS": {
+    "name": "CSS",
+    "category": "frontend",
+    "image": "./assets/techs/css.svg",
+    "link": "https://www.w3.org/Style/CSS/",
+    "isRelevant": false
+  },
+  "Javascript": {
+    "name": "Javascript",
+    "category": "frontend",
+    "image": "./assets/techs/javascript.svg",
+    "link": "https://www.javascript.com/",
+    "isRelevant": false
+  },
+  "Typescript": {
+    "name": "Typescript",
+    "category": "frontend",
+    "image": "./assets/techs/typescript.svg",
+    "link": "https://www.typescriptlang.org/",
+    "isRelevant": true
+  },
+  "React": {
+    "name": "React",
+    "category": "frontend",
+    "image": "./assets/techs/react.svg",
+    "link": "https://reactjs.org/",
+    "isRelevant": true
+  },
+  "Angular": {
+    "name": "Angular",
+    "category": "frontend",
+    "image": "./assets/techs/angular.svg",
+    "link": "https://angular.dev/",
+    "isRelevant": true
+  },
+  "Tailwind": {
+    "name": "Tailwind",
+    "category": "frontend",
+    "image": "./assets/techs/tailwind.svg",
+    "link": "https://tailwindcss.com/",
+    "isRelevant": true
+  },
+  "NodeJS": {
+    "name": "Node.js",
+    "category": "backend",
+    "image": "./assets/techs/nodejs.svg",
+    "link": "https://nodejs.org/",
+    "isRelevant": true
+  },
+  "Golang": {
+    "name": "Golang",
+    "category": "backend",
+    "image": "./assets/techs/golang.svg",
+    "link": "https://golang.org/",
+    "isRelevant": true
+  },
+  "Express": {
+    "name": "Express",
+    "category": "backend",
+    "image": "./assets/techs/express.svg",
+    "link": "https://expressjs.com/",
+    "isRelevant": true
+  },
+  "Gin": {
+    "name": "Gin",
+    "category": "backend",
+    "image": "./assets/techs/gin.svg",
+    "link": "https://gin-gonic.com/",
+    "isRelevant": true
+  },
+  "SocketIO": {
+    "name": "Socket.io",
+    "category": "backend",
+    "image": "./assets/techs/socketio.svg",
+    "link": "https://socket.io/",
+    "isRelevant": true
+  },
+  "WebRTC": {
+    "name": "WebRTC",
+    "category": "backend",
+    "image": "./assets/techs/webrtc.svg",
+    "link": "https://webrtc.org/",
+    "isRelevant": true
+  },
+  "Vitest": {
+    "name": "Vitest",
+    "category": "test",
+    "image": "./assets/techs/vitest.svg",
+    "link": "https://vitejs.dev/",
+    "isRelevant": true
+  },
+  "NGINX": {
+    "name": "NGINX",
+    "category": "infra",
+    "image": "./assets/techs/nginx.svg",
+    "link": "https://www.nginx.com/",
+    "isRelevant": true
+  }
+}
