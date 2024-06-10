@@ -12,7 +12,7 @@ export class TechService {
     'https://raw.githubusercontent.com/leogues/portfolio/main/portfolio-data/techs.json'
   private http = inject(HttpClient)
 
-  private techsQuery = new APIQuery<Technologies, Error[]>({})
+  private techsQuery = new APIQuery<Technologies, Error>({})
   techs = new DataQuery(this.techsQuery)
 
   fetchTechs() {

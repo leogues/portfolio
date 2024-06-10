@@ -1,5 +1,14 @@
-import { Component, Input } from '@angular/core'
+import {
+  Component,
+  Input,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core'
 import { CommonModule, NgOptimizedImage } from '@angular/common'
+import { Project } from '../types/Project'
+import { TechService } from '../service/tech.service'
 
 @Component({
   selector: 'app-project',
@@ -9,11 +18,23 @@ import { CommonModule, NgOptimizedImage } from '@angular/common'
   styleUrl: './project.component.scss',
 })
 export class ProjectComponent {
-  @Input() handleSave?: () => void
-  @Input() handleCancel?: () => void
+  techService = inject(TechService)
+  techs = this.techService.techs.data
+  @Input({
+    required: true,
+    transform: (project: Project) => {
+      return signal(project)
+    },
+  })
+  project!: WritableSignal<Project>
+
   @Input({ required: true, alias: 'ngClass' }) customClass!:
     | string
     | string[]
     | Set<string>
     | { [klass: string]: any }
+
+  techsInProject = computed(() =>
+    this.project().techs.map((tech) => this.techs()[tech]),
+  )
 }

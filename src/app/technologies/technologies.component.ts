@@ -28,10 +28,6 @@ export class TechnologiesComponent {
     ),
   )
 
-  constructor() {
-    effect(() => console.log(this.technologiesList()))
-  }
-
   groupByCategory(technologies: Technology[]) {
     let groupedTechnologies: groupedTechnologies = []
     const key = 'category'

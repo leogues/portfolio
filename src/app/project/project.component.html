@@ -2,21 +2,30 @@
   <div class="project-content">
     <header>
       <span>Featured Project</span>
-      <h3>Example Project</h3>
+      <h3>{{ project().title }}</h3>
     </header>
-    <article
-      >A web app for visualizing personalized Spotify data. View your top
-      artists, top tracks, recently played tracks, and detailed audio
-      information about each track. Create and save new playlists of recommended
-      tracks based on your existing playlists and more.
-    </article>
-    <div class="techs">Nodejs, React, JS </div>
+    <article>{{ project().description }} </article>
+    <div class="techs">
+      @for(tech of techsInProject(); track tech) {
+      <div
+        ><img
+          [src]="tech.image"
+          [class]="{
+            'dark': tech.isDarkImage,
+          }"
+          width="28"
+          height="28"
+          alt="tech"
+      /></div>
+
+      }
+    </div>
 
     <footer>
-      <a href="" target="_blank">
+      <a [href]="project().github" target="_blank">
         <img width="20" height="20" src="./assets/github.svg" alt="github" />
       </a>
-      <a href="" target="_blank">
+      <a [href]="project().demo" target="_blank">
         <img width="23" height="23" src="./assets/external-link.svg" alt="Ir" />
       </a>
     </footer>
@@ -24,7 +33,7 @@
   <div class="project-image">
     <div class="image-container">
       <img
-        ngSrc="./assets/video-call-app.png"
+        [ngSrc]="project().picture"
         width="636.183"
         height="441.233"
         alt="project-example"

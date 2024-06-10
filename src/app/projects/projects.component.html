@@ -2,7 +2,8 @@
   <h2>Meus projetos</h2>
 
   <div class="project-list">
-    <app-project [handleSave]="handleSave" [ngClass]="{ even: false }" />
-    <app-project [ngClass]="{ even: true }" />
+    @for(project of projects(); let odd = $odd; track project.id){
+    <app-project [project]="project" [ngClass]="{ odd: odd }" />
+    }
   </div>
 </div>

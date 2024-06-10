@@ -1,6 +1,7 @@
-import { Component } from '@angular/core'
+import { Component, effect, inject } from '@angular/core'
 import { ProjectComponent } from '../project/project.component'
 import { CommonModule } from '@angular/common'
+import { ProjectService } from '../service/project.service'
 
 @Component({
   selector: 'app-projects',
@@ -10,11 +11,6 @@ import { CommonModule } from '@angular/common'
   styleUrl: './projects.component.scss',
 })
 export class ProjectsComponent {
-  handleSave = () => {
-    console.log('handleSave')
-  }
-
-  handleCancel = () => {
-    console.log('handleCancel')
-  }
+  private projectService = inject(ProjectService)
+  protected projects = this.projectService.projetcs.data
 }

@@ -37,6 +37,15 @@
       flex-wrap: wrap;
       gap: 1rem;
       margin-top: 0.75rem;
+      .dark {
+        filter: invert(100%);
+      }
+      img {
+        filter: grayscale(100%) contrast(100%);
+        &:hover {
+          filter: none;
+        }
+      }
     }
 
     footer {
@@ -81,7 +90,7 @@
   }
 }
 
-.even {
+.odd {
   header {
     margin: 0 0 0 6% !important;
 
