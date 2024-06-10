@@ -1,8 +1,9 @@
-import { Component } from '@angular/core'
-import { Technologies, Technology } from '../../types/Technology'
+import { Component, computed, inject, signal } from '@angular/core'
 import { TechnologyComponent } from '../technology/technology.component'
 import { CapitalizeFirstLetterPipe } from '../pipes/capitalize-first-letter.pipe'
 import { CommonModule } from '@angular/common'
+import { TechService } from '../service/tech.service'
+import { Technology, Technologies } from '../types/Technology'
 
 type groupedTechnologies = Technology[][]
 
@@ -14,105 +15,20 @@ type groupedTechnologies = Technology[][]
   styleUrl: './technologies.component.scss',
 })
 export class TechnologiesComponent {
-  technologiesList: Technologies = {}
-  showRelevantOnly: boolean = true
-  technologiesListByCategory: groupedTechnologies = []
-  filteredListByCategory: groupedTechnologies = []
+  private techService = inject(TechService)
+  showRelevantOnly = signal<boolean>(true)
+  protected technologiesList = this.techService.techs.data
+  protected technologiesListByCategory = computed(() =>
+    this.groupByCategory(Object.values(this.technologiesList())),
+  )
+  filteredListByCategory = computed(() =>
+    this.filterByRelevance(
+      this.technologiesListByCategory(),
+      this.showRelevantOnly(),
+    ),
+  )
 
   constructor() {
-    this.technologiesList = {
-      HTML: {
-        name: 'HTML',
-        category: 'frontend',
-        image: './assets/techs/html.svg',
-        link: 'https://www.w3.org/html/',
-        isRelevant: false,
-      },
-      CSS: {
-        name: 'CSS',
-        category: 'frontend',
-        image: './assets/techs/css.svg',
-        link: 'https://www.w3.org/Style/CSS/',
-        isRelevant: false,
-      },
-      JavaScript: {
-        name: 'JavaScript',
-        category: 'frontend',
-        image: './assets/techs/javascript.svg',
-        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-        isRelevant: false,
-      },
-      HTML2: {
-        name: 'HTML',
-        category: 'frontend',
-        image: './assets/techs/html.svg',
-        link: 'https://www.w3.org/html/',
-        isRelevant: true,
-      },
-      CSS2: {
-        name: 'CSS',
-        category: 'frontend',
-        image: './assets/techs/css.svg',
-        link: 'https://www.w3.org/Style/CSS/',
-        isRelevant: true,
-      },
-      JavaScript2: {
-        name: 'JavaScript',
-        category: 'frontend',
-        image: './assets/techs/javascript.svg',
-        link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-        isRelevant: true,
-      },
-      Nodejs: {
-        name: 'Nodejs',
-        category: 'backend',
-        image: 'path/to/image/nodejs.png',
-        link: 'https://nodejs.org/',
-        isRelevant: true,
-      },
-      Python: {
-        name: 'Python',
-        category: 'backend',
-        image: 'path/to/image/python.png',
-        link: 'https://www.python.org/',
-        isRelevant: true,
-      },
-      RubyOnRails: {
-        name: 'Ruby on Rails',
-        category: 'backend',
-        image: 'path/to/image/rubyonrails.png',
-        link: 'https://rubyonrails.org/',
-        isRelevant: true,
-      },
-      Jest: {
-        name: 'Jest',
-        category: 'test',
-        image: 'path/to/image/jest.png',
-        link: 'https://jestjs.io/',
-        isRelevant: false,
-      },
-      Mocha: {
-        name: 'Mocha',
-        category: 'test',
-        image: 'path/to/image/mocha.png',
-        link: 'https://mochajs.org/',
-        isRelevant: false,
-      },
-      Selenium: {
-        name: 'Selenium',
-        category: 'test',
-        image: 'path/to/image/selenium.png',
-        link: 'https://www.selenium.dev/',
-        isRelevant: false,
-      },
-    }
-
-    this.technologiesListByCategory = this.groupByCategory(
-      Object.values(this.technologiesList),
-    )
-
-    this.filterByRelevance()
-
     console.log(this.filteredListByCategory)
   }
 
@@ -137,14 +53,16 @@ export class TechnologiesComponent {
   }
 
   toggleRelevanceFilter() {
-    this.showRelevantOnly = !this.showRelevantOnly
-    this.filterByRelevance()
+    this.showRelevantOnly.update((value) => !value)
   }
 
-  filterByRelevance() {
-    this.filteredListByCategory = this.technologiesListByCategory
+  filterByRelevance(
+    technologiesListByCategory: groupedTechnologies,
+    showRelevantOnly: boolean,
+  ) {
+    return technologiesListByCategory
       .map((categoryList) =>
-        this.showRelevantOnly
+        showRelevantOnly
           ? categoryList.filter((tech) => tech.isRelevant)
           : categoryList,
       )

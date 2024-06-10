@@ -2,11 +2,11 @@
   <h2>Tecnologia e Ferramentas</h2>
 
   <div class="category">
-    @for (categoryGroup of filteredListByCategory ; track 'category-' +
+    @for (categoryGroup of filteredListByCategory() ; track 'category-' +
     categoryGroup){
 
     <section>
-      <h3>{{categoryGroup[0].category | capitalizeFirstLetter}}</h3>
+      <h3>{{ categoryGroup[0].category | capitalizeFirstLetter }}</h3>
 
       <div class="technology-list">
         @for (technology of categoryGroup ; track technology.name){
@@ -18,9 +18,12 @@
   </div>
   <footer>
     <button class="btn show-more" (click)="toggleRelevanceFilter()">
-      <span>{{showRelevantOnly ? 'Mostrar tudo' : 'Mostra menos'}}</span>
-      <img [ngClass]="showRelevantOnly ? 'rotate-90' : 'rotate-270'" src="" alt=">">
+      <span>{{ showRelevantOnly() ? 'Mostrar tudo' : 'Mostra menos' }}</span>
+      <img
+        [class]="showRelevantOnly() ? 'rotate-90' : 'rotate-270'"
+        src=""
+        alt=">"
+      />
     </button>
   </footer>
-
 </div>

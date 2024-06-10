@@ -90,11 +90,18 @@
     "link": "https://webrtc.org/",
     "isRelevant": true
   },
-  "Vitest": {
-    "name": "Vitest",
-    "category": "test",
-    "image": "./assets/techs/vitest.svg",
-    "link": "https://vitejs.dev/",
+  "Cloudflare": {
+    "name": "Cloudflare",
+    "category": "infra",
+    "image": "./assets/techs/cloudflare.svg",
+    "link": "https://www.cloudflare.com/",
+    "isRelevant": true
+  },
+  "Docker": {
+    "name": "Docker",
+    "category": "infra",
+    "image": "./assets/techs/docker.svg",
+    "link": "https://www.docker.com/",
     "isRelevant": true
   },
   "NGINX": {
@@ -102,6 +109,13 @@
     "category": "infra",
     "image": "./assets/techs/nginx.svg",
     "link": "https://www.nginx.com/",
+    "isRelevant": true
+  },
+  "Actions": {
+    "name": "Github Actions",
+    "category": "infra",
+    "image": "./assets/techs/githubactions.svg",
+    "link": "https://docs.github.com/pt/actions",
     "isRelevant": true
   }
 }

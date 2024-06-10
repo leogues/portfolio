@@ -1,4 +1,4 @@
-export type Technologies = { [key: string]: Technology }
+export type Technologies = Record<string, Technology>
 
 export type Technology = {
   name: string

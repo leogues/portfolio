@@ -3,32 +3,44 @@
     {
       "id": 0,
       "title": "Video Chat WebRTC",
+      "picture": "./assets/video-call-app.png",
       "description": "A web app for visualizing personalized Spotify data. View your top artists, top tracks, recently played tracks, and detailed audio information about each track. Create and save new playlists of recommended tracks based on your existing playlists and more. ",
       "isWorkInProgress": false,
       "isRelevant": true,
-      "github": "",
-      "demo": "",
+      "github": "https://github.com/leogues/project-webrtc",
+      "demo": "https://live.leogues.com.br/login",
       "techs": [
         "Typescript",
         "React",
         "Tailwind",
-        "Vitest",
         "NodeJS",
         "Express",
         "SocketIO",
         "WebRTC",
-        "NGINX"
+        "Docker",
+        "NGINX",
+        "Actions"
       ]
     },
     {
       "id": 1,
       "title": "MusicHub",
+      "picture": "./assets/video-call-app.png",
       "description": "A web app for visualizing personalized Spotify data. View your top artists, top tracks, recently played tracks, and detailed audio information about each track. Create and save new playlists of recommended tracks based on your existing playlists and more. ",
       "isWorkInProgress": true,
       "isRelevant": true,
-      "github": "",
-      "demo": "",
-      "techs": ["Typescript", "Angular", "Tailwind", "Golang", "Gin"]
+      "github": "https://github.com/leogues/MusicHub",
+      "demo": "https://musichub.leogues.com.br/",
+      "techs": [
+        "Typescript",
+        "Angular",
+        "Tailwind",
+        "Golang",
+        "Gin",
+        "Docker",
+        "NGINX",
+        "Actions"
+      ]
     }
   ]
 }
