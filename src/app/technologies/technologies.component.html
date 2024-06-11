@@ -1,11 +1,17 @@
-<div class="tech">
+<div
+  class="tech"
+  data-scroll
+  data-scroll-offset="10%, 10%"
+  data-scroll
+  data-scroll-class="c-scroll-opacity"
+>
   <h2>Tecnologia e Ferramentas</h2>
 
   <div class="category">
     @for (categoryGroup of filteredListByCategory() ; track 'category-' +
     categoryGroup){
 
-    <section>
+    <section data-scroll>
       <h3>{{ categoryGroup[0].category | capitalizeFirstLetter }}</h3>
 
       <div class="technology-list">
@@ -16,7 +22,7 @@
     </section>
     }
   </div>
-  <footer>
+  <footer data-scroll>
     <button class="btn show-more" (click)="toggleRelevanceFilter()">
       <span>{{ showRelevantOnly() ? 'Mostrar tudo' : 'Mostra menos' }}</span>
       <img

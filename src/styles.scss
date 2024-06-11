@@ -1,13 +1,13 @@
 @import './styles/reset.scss';
 @import './styles/colors.scss';
 @import './styles/font.scss';
+@import './styles/locomotive-scroll.scss';
 
 body {
   background-color: $dark-purple-400;
   font-family: $ff-primary;
   font-weight: $fw-400;
   color: white;
-  padding-block-end: 5rem;
 }
 
 h2 {
@@ -43,8 +43,54 @@ h3 {
 
 .btn-primary {
   background-color: $purple-400;
+  &:hover {
+    filter: brightness(110%);
+  }
 }
 
 .btn-secondary {
   border: 1px solid $light-grey;
+  &:hover {
+    filter: brightness(85%);
+  }
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  height: 7px;
+  width: 7px;
+}
+*::-webkit-scrollbar-track {
+  border-radius: 7px;
+  background-color: #11071f;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: #11071f;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: #11071f;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  background-color: #737988;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #737988;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: #737988;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #737988 #11071f;
 }
