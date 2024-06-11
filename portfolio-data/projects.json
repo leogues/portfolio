@@ -2,7 +2,7 @@
   "projects": [
     {
       "id": 0,
-      "title": "WebRTC: Video chat app",
+      "title": "Live Link",
       "picture": "./assets/video-call-app.png",
       "description": "Um web app de video chat com suporte a múltiplos usuários em uma mesma sala. ",
       "isWorkInProgress": false,
