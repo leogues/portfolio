@@ -5,10 +5,20 @@
     </a>
   </div>
   <div class="nav-pill">
-    <a class="nav-item left active">
+    <a
+      class="nav-item left"
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
       <div>Home</div>
     </a>
-    <a class="nav-item right">
+    <a
+      class="nav-item right"
+      routerLink="/infra"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
       <div>Infra</div>
     </a>
   </div>
