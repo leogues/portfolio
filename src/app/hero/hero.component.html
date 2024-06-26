@@ -1,24 +1,29 @@
 <section class="hero">
   <div class="hero-left" data-scroll data-scroll-speed="0.25">
-    <div class="greeting-wrapper">
-      <span>Olá, eu sou</span>
-      <div class="polygon"></div>
-    </div>
-    <div class="developer-info">
-      <h1>Leonardo Rodrigues</h1>
-      <span>Um desenvolvedor Full Stack</span>
-    </div>
-    <div class="button-wrapper">
-      <a href="assets/documents/cv.pdf" download="cv.pdf">
-        <button class="btn btn-primary">Download CV</button>
-      </a>
-      <button (click)="handleProjects()" class="btn btn-secondary"
-        >Meus trabalhos</button
-      >
+    <div>
+      <div class="greeting-wrapper">
+        <span>Olá, eu sou</span>
+        <div class="polygon"></div>
+      </div>
+      <div class="developer-info">
+        <h1>Leonardo Rodrigues</h1>
+        <span>Um desenvolvedor Full Stack</span>
+      </div>
+      <div class="button-wrapper">
+        <a href="assets/documents/cv.pdf" download="cv.pdf">
+          <button class="btn btn-primary">Download CV</button>
+        </a>
+        <button (click)="handleProjects()" class="btn btn-secondary"
+          >Meus trabalhos</button
+        >
+      </div>
     </div>
   </div>
   <div class="hero-right" data-scroll>
-    <img src="./assets/leonardo.png" alt="leonardo" />
+    <div class="image-container">
+      <img class="avatar" src="./assets/leonardo2.png" alt="" />
+      <img class="blur" src="./assets/blur-about.png" alt="" />
+    </div>
   </div>
   <div class="scroll-down">
     <img

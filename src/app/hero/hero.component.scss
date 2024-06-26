@@ -2,10 +2,13 @@
 @import '../../styles/font.scss';
 
 .hero {
+  $margin-top: 5.062rem;
   display: flex;
-  height: 100%;
+  height: calc(100% - $margin-top);
+  margin-top: $margin-top;
   padding: 1rem;
   position: relative;
+  justify-content: space-evenly;
 
   flex: 1;
   min-height: 0;
@@ -14,8 +17,7 @@
   flex-wrap: wrap-reverse;
 
   & > * {
-    flex: 1;
-    flex-basis: 340px;
+    flex: 1 0 340px;
   }
 
   .hero-left {
@@ -24,6 +26,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
 
     .greeting-wrapper {
       display: flex;
@@ -96,12 +99,25 @@
   }
 
   .hero-right {
-    display: flex;
+    margin: auto 0;
+    .image-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      .avatar {
+        width: 100%;
+        max-width: 40%;
+      }
 
-    flex-direction: column;
-    justify-content: center;
-    img {
-      mix-blend-mode: color-dodge;
+      .blur {
+        position: absolute;
+        z-index: -1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-height: 160%;
+      }
     }
   }
 
