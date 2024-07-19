@@ -6,7 +6,7 @@
 
 [![demo][demo-image]](https://www.leogues.com.br/)
 
-[demo-image]: https://raw.githubusercontent.com/leogues/portfolio/dev/client/public/demo.png
+[demo-image]: https://github.com/leogues/portfolio/blob/main/src/assets/demo.png?raw=true
 
 ## 🚀 Começando
 
@@ -44,7 +44,7 @@ git clone https://github.com/leogues/portfolio.git
 npm install
 ```
 
-3. Execute o docker compose
+3. Execute o projeto
 
 ```sh
 ng serve
