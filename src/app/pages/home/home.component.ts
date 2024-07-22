@@ -1,11 +1,11 @@
 import { Component } from '@angular/core'
 import { RouterOutlet } from '@angular/router'
+import LocomotiveScroll from 'locomotive-scroll'
 import { AboutComponent } from '../../about/about.component'
 import { HeaderComponent } from '../../header/header.component'
 import { HeroComponent } from '../../hero/hero.component'
-import { TechnologiesComponent } from '../../technologies/technologies.component'
 import { ProjectsComponent } from '../../projects/projects.component'
-import LocomotiveScroll from 'locomotive-scroll'
+import { TechnologiesComponent } from '../../technologies/technologies.component'
 
 @Component({
   selector: 'app-home',
@@ -30,7 +30,6 @@ export class HomeComponent {
         content: document.querySelector(
           '[data-scroll-container]',
         ) as HTMLElement,
-        duration: 1.8,
         smoothWheel: true,
       },
     })
