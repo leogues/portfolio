@@ -17,6 +17,7 @@
       @for(tech of techsInProject(); track tech) {
       <a [href]="tech.link" target="_blank"
         ><img
+          loading="lazy"
           [src]="tech.image"
           [class]="{
             'dark': tech.isDarkImage,
@@ -31,10 +32,22 @@
 
     <footer>
       <a [href]="project().github" target="_blank">
-        <img width="20" height="20" src="./assets/github.svg" alt="github" />
+        <img
+          loading="lazy"
+          width="20"
+          height="20"
+          src="./assets/github.svg"
+          alt="github"
+        />
       </a>
       <a [href]="project().demo" target="_blank">
-        <img width="23" height="23" src="./assets/external-link.svg" alt="Ir" />
+        <img
+          loading="lazy"
+          width="23"
+          height="23"
+          src="./assets/external-link.svg"
+          alt="Ir"
+        />
       </a>
     </footer>
   </div>

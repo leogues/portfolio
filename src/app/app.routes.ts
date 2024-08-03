@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router'
-import { HomeComponent } from './pages/home/home.component'
-import { InfraComponent } from './pages/infra/infra.component'
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'infra', component: InfraComponent },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./pages/home/home.routes').then((m) => m.HOME_ROUTES),
+  },
+  {
+    path: 'infra',
+    loadChildren: () =>
+      import('./pages/infra/infra.routes').then((m) => m.INFRA_ROUTES),
+  },
 ]

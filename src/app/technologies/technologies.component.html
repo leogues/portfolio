@@ -26,6 +26,7 @@
     <button class="btn show-more" (click)="toggleRelevanceFilter()">
       <span>{{ showRelevantOnly() ? 'Mostrar tudo' : 'Mostra menos' }}</span>
       <img
+        loading="lazy"
         [class]="{ 'rotate-180': !showRelevantOnly() }"
         width="20"
         src="assets/arrow.png"
