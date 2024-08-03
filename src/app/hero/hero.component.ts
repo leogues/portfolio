@@ -1,9 +1,10 @@
+import { NgOptimizedImage } from '@angular/common'
 import { Component } from '@angular/core'
 
 @Component({
   selector: 'app-hero',
   standalone: true,
-  imports: [],
+  imports: [NgOptimizedImage],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.scss',
 })
