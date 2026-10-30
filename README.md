@@ -4,7 +4,7 @@
 
 ## Sobre o projeto
 
-[![demo][demo-image]](https://www.leogues.com.br/)
+[![demo][demo-image]](https://www.leogues.com/)
 
 [demo-image]: https://github.com/leogues/portfolio/blob/main/src/assets/demo.png?raw=true
 

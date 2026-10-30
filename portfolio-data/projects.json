@@ -8,7 +8,7 @@
       "isWorkInProgress": false,
       "isRelevant": true,
       "github": "https://github.com/leogues/project-webrtc",
-      "demo": "https://live.leogues.com.br/login",
+      "demo": "https://live.leogues.com/login",
       "techs": [
         "Typescript",
         "React",
@@ -30,7 +30,7 @@
       "isWorkInProgress": true,
       "isRelevant": true,
       "github": "https://github.com/leogues/MusicHub",
-      "demo": "https://music.leogues.com.br/",
+      "demo": "https://music.leogues.com/",
       "techs": [
         "Typescript",
         "Angular",
