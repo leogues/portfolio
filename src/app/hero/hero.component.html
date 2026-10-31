@@ -1,50 +1,85 @@
-<section class="hero">
-  <div class="hero-left" data-scroll data-scroll-speed="0.25">
-    <div>
-      <div class="greeting-wrapper">
-        <span>Olá, eu sou</span>
-        <div class="polygon"></div>
-      </div>
-      <div class="developer-info">
-        <h1>Leonardo Rodrigues</h1>
-        <span>Um desenvolvedor Full Stack</span>
-      </div>
-      <div class="button-wrapper">
-        <a href="assets/documents/cv.pdf" download="cv.pdf">
-          <button class="btn btn-primary">Download CV</button>
-        </a>
-        <button (click)="handleProjects()" class="btn btn-secondary"
-          >Meus trabalhos</button
-        >
-      </div>
+<section class="hero" aria-labelledby="home-title">
+  <div class="hero-copy">
+    <div class="eyebrow"><span></span> BACK-END & ENGENHARIA DE DADOS</div>
+    <h1 id="home-title">Leonardo<br /><span>Rodrigues.</span></h1>
+    <p class="hero-role"
+      >Desenvolvedor Back-end Sênior<br />e Engenheiro de Dados.</p
+    >
+    <p class="hero-summary"
+      >Arquitetura e evolução de sistemas distribuídos e plataformas de dados.
+      Desde 2020, com foco em performance, escalabilidade e custos.</p
+    >
+    <div class="core-stack" aria-label="Linguagens principais"
+      ><span>Go</span><span>Node.js / TypeScript</span><span>Python</span></div
+    >
+    <div class="hero-actions">
+      <a
+        class="primary-link"
+        href="/#projects"
+        aria-label="Ver projetos"
+        (click)="exploreProjects($event)"
+        >Projetos</a
+      >
+      <a
+        class="secondary-link"
+        href="/assets/documents/cv.pdf"
+        download="Leonardo-Rodrigues.pdf"
+        type="application/pdf"
+        aria-label="Baixar currículo em PDF"
+        title="Baixar currículo em PDF"
+        >Currículo</a
+      >
+      <a
+        class="secondary-link"
+        href="https://www.linkedin.com/in/leogues/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >LinkedIn</a
+      >
     </div>
+    <a class="infra-link" routerLink="/infra"
+      >Explore a infraestrutura <span>↗</span></a
+    >
   </div>
-  <div class="hero-right" data-scroll>
-    <div class="image-container">
-      <img
-        class="avatar"
+  <div class="hero-art" aria-hidden="true">
+    <div class="portrait-orbit outer-orbit"></div
+    ><div class="portrait-orbit inner-orbit"></div>
+    <div class="portrait-glow"></div>
+    <div class="portrait-frame"
+      ><img
         ngSrc="./assets/leonardo2.png"
-        width="300"
-        height="400"
+        width="394"
+        height="533"
+        priority
         alt=""
-      />
-      <img
-        class="blur"
-        ngSrc="./assets/blur-about.png"
-        width="650"
-        height="650"
-        priority="true"
-        alt=""
-      />
-    </div>
-  </div>
-  <div class="scroll-down">
-    <img
-      src="./assets/arrow-down.svg"
-      loading="lazy"
-      alt="scroll"
-      data-scroll
-      data-scroll-speed="10"
-    />
+      /><div class="portrait-caption"
+        ><span></span> Leonardo Rodrigues
+        <small>Software & Data Engineering</small></div
+      ></div
+    >
+    <span class="floating-tool tool-go"><b>Go</b> Back-end</span
+    ><span class="floating-tool tool-kafka"><b>K</b> Kafka</span
+    ><span class="floating-tool tool-clickhouse"><b>CH</b> ClickHouse</span
+    ><span class="floating-tool tool-kubernetes"><b>K8s</b> Kubernetes</span>
   </div>
 </section>
+<div class="focus-strip" aria-label="Áreas de atuação"
+  ><div
+    ><span>01</span
+    ><p>Back-end<strong>Serviços e sistemas distribuídos</strong></p></div
+  ><div
+    ><span>02</span
+    ><p
+      >Engenharia de dados<strong
+        >Ingestão, processamento e analytics</strong
+      ></p
+    ></div
+  ><div
+    ><span>03</span
+    ><p
+      >Cloud & operação<strong
+        >Infraestrutura, GitOps e observabilidade</strong
+      ></p
+    ></div
+  ></div
+>

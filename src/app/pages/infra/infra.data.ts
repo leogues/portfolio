@@ -27,8 +27,8 @@ export interface DiagramEdge {
   target?: 'top' | 'bottom' | 'left' | 'right'
   sourceOffset?: number
   targetOffset?: number
+  channel?: number
   labelPosition?: number
-  labelOffset?: number
 }
 
 export interface DiagramFlow {
@@ -73,8 +73,8 @@ export const INFRA_NODES: InfraNode[] = [
     'CF',
     'cyan',
     'Borda',
-    'Os domínios passam pelo proxy da Cloudflare antes de chegar à infraestrutura Oracle. O external-dns mantém os registros alinhados às rotas do Kubernetes.',
-    ['DNS com proxy', 'Entrada HTTP/HTTPS', 'Registros via external-dns'],
+    'Os domínios passam pelo proxy da Cloudflare antes de chegar à infraestrutura Oracle. O External DNS mantém os registros alinhados às rotas do Kubernetes.',
+    ['DNS com proxy', 'Entrada HTTP/HTTPS', 'Registros via External DNS'],
   ),
   node(
     'nlb',
@@ -121,8 +121,8 @@ export const INFRA_NODES: InfraNode[] = [
     'NG',
     'cyan',
     'Roteamento',
-    'O NGINX Gateway Fabric recebe as conexões e distribui as requisições por domínio e caminho. Os certificados TLS são gerenciados pelo cert-manager.',
-    ['Kubernetes Gateway API', 'Rotas / e /api/', 'TLS com cert-manager'],
+    'O NGINX Gateway Fabric recebe as conexões e distribui as requisições por domínio e caminho. Os certificados TLS são gerenciados pelo Cert Manager.',
+    ['Kubernetes Gateway API', 'Rotas / e /api/', 'TLS com Cert Manager'],
   ),
   node(
     'apps',
@@ -269,10 +269,10 @@ export const INFRA_NODES: InfraNode[] = [
     'TF',
     'purple',
     'Provisionamento',
-    'O projeto oracle-infra provisiona os recursos OCI e prepara a base do K3s com cloud-init. O estado remoto fica no HCP Terraform; a configuração dos workloads segue pelo Argo CD.',
+    'O projeto oracle-infra provisiona os recursos OCI e prepara a base do K3s com Cloud Init. O estado remoto fica no HCP Terraform; a configuração dos workloads segue pelo Argo CD.',
     [
       'OCI: rede e compute',
-      'Bootstrap com cloud-init',
+      'Bootstrap com Cloud Init',
       'Estado remoto no HCP Terraform',
     ],
   ),
@@ -313,11 +313,11 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'tls',
     'TLS + DNS',
-    'cert-manager · external-dns',
+    'Cert Manager · External DNS',
     'TLS',
     'cyan',
     'Automação de borda',
-    'O cert-manager emite certificados Let’s Encrypt com validação DNS-01 pela Cloudflare. O external-dns observa as HTTPRoutes e reconcilia os registros DNS com proxy habilitado.',
+    'O Cert Manager emite certificados Let’s Encrypt com validação DNS-01 pela Cloudflare. O External DNS observa as HTTPRoutes e reconcilia os registros DNS com proxy habilitado.',
     [
       'Let’s Encrypt / ACME',
       'DNS-01 na Cloudflare',
@@ -477,10 +477,10 @@ export const INFRA_FLOWS: DiagramFlow[] = [
       p('postgres', 1020, 510),
     ],
     edges: [
-      e('cloudflare', 'gateway', 'cyan', 'via NLB'),
+      e('cloudflare', 'gateway', 'cyan', 'NLB'),
       e('gateway', 'apps', 'cyan'),
       e('gitops', 'argo', 'purple'),
-      e('argo', 'apps', 'purple', 'reconcilia', {
+      e('argo', 'apps', 'purple', 'Reconcilia', {
         source: 'bottom',
         target: 'top',
       }),
@@ -509,7 +509,7 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     lanes: [
       lane('PROVISIONAMENTO DO NLB', 0),
       lane('TRÁFEGO PÚBLICO', 1),
-      lane('APLICAÇÕES E DADOS', 2, 310),
+      lane('APLICAÇÕES E DADOS', 2, 410),
     ],
     nodes: [
       p('ccm', 340, 50),
@@ -520,7 +520,7 @@ export const INFRA_FLOWS: DiagramFlow[] = [
       p('frontends', 0, 510),
       p('go', 340, 510),
       p('node', 680, 510),
-      p('postgres', 1020, 510),
+      p('postgres', 340, 710),
     ],
     edges: [
       e('cloudflare', 'nlb', 'cyan'),
@@ -530,22 +530,27 @@ export const INFRA_FLOWS: DiagramFlow[] = [
         target: 'top',
         sourceOffset: -70,
         targetOffset: 80,
+        channel: 410,
       }),
-      e('gateway', 'go', 'cyan', '/api/', { source: 'bottom', target: 'top' }),
+      e('gateway', 'go', 'cyan', '/api/', {
+        source: 'bottom',
+        target: 'top',
+        channel: 440,
+      }),
       e('gateway', 'node', 'cyan', '/api/', {
         source: 'bottom',
         target: 'top',
         sourceOffset: 70,
+        channel: 470,
       }),
       e('go', 'postgres', 'amber', undefined, {
         source: 'bottom',
-        target: 'bottom',
-        targetOffset: 40,
+        target: 'top',
       }),
       e('node', 'postgres', 'amber', undefined, {
         source: 'bottom',
-        target: 'bottom',
-        targetOffset: -40,
+        target: 'top',
+        targetOffset: 50,
       }),
       e('gateway', 'lbservice', 'purple', undefined, {
         source: 'top',
@@ -557,7 +562,7 @@ export const INFRA_FLOWS: DiagramFlow[] = [
         target: 'right',
         dashed: true,
       }),
-      e('ccm', 'nlb', 'purple', 'provisiona', {
+      e('ccm', 'nlb', 'purple', 'Provisiona', {
         source: 'bottom',
         target: 'top',
         dashed: true,
@@ -585,17 +590,17 @@ export const INFRA_FLOWS: DiagramFlow[] = [
       p('apps', 340, 510),
     ],
     edges: [
-      e('github', 'registry', 'purple', 'build'),
-      e('registry', 'updater', 'purple', 'imagem'),
-      e('updater', 'gitops', 'purple', 'commit', {
+      e('github', 'registry', 'purple', 'Build'),
+      e('registry', 'updater', 'purple', 'Tag'),
+      e('updater', 'gitops', 'purple', 'Commit', {
         source: 'bottom',
         target: 'top',
       }),
-      e('gitops', 'argo', 'purple', 'sync', {
+      e('gitops', 'argo', 'purple', 'Sync', {
         source: 'left',
         target: 'right',
       }),
-      e('argo', 'apps', 'purple', 'rollout', {
+      e('argo', 'apps', 'purple', 'Rollout', {
         source: 'bottom',
         target: 'top',
       }),
@@ -615,36 +620,36 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     ],
     nodes: [
       p('go', 0, 50),
-      p('node', 340, 50),
+      p('node', 510, 50),
       p('infra', 1020, 50),
       p('metadata', 0, 280),
-      p('collector', 340, 280),
+      p('collector', 510, 280),
       p('keeper', 0, 510),
-      p('clickhouse', 680, 510),
+      p('clickhouse', 510, 510),
       p('grafana', 1020, 510),
     ],
     edges: [
       e('go', 'collector', 'green', undefined, {
         source: 'bottom',
         target: 'top',
-        targetOffset: -50,
+        targetOffset: -64,
       }),
       e('node', 'collector', 'green', 'OTLP', {
         source: 'bottom',
         target: 'top',
-        targetOffset: 50,
       }),
-      e('infra', 'collector', 'green', 'coleta', {
+      e('infra', 'collector', 'green', undefined, {
         source: 'bottom',
-        target: 'right',
+        target: 'top',
+        targetOffset: 64,
       }),
-      e('metadata', 'collector', 'green', 'contexto', { dashed: true }),
-      e('collector', 'clickhouse', 'green', '3 sinais', {
+      e('metadata', 'collector', 'green', undefined, { dashed: true }),
+      e('collector', 'clickhouse', 'green', 'Três sinais', {
         source: 'bottom',
         target: 'top',
       }),
-      e('clickhouse', 'grafana', 'green', 'consultas'),
-      e('keeper', 'clickhouse', 'green', 'coordenação', { dashed: true }),
+      e('clickhouse', 'grafana', 'green', 'Consultas'),
+      e('keeper', 'clickhouse', 'green', undefined, { dashed: true }),
     ],
   },
   {
@@ -657,151 +662,50 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     lanes: [
       lane('PROVISIONAMENTO E ACESSO', 0),
       lane('SERVIÇOS DA PLATAFORMA', 1),
-      lane('PERSISTÊNCIA', 2, 310),
+      lane('PERSISTÊNCIA', 2, 410),
     ],
     nodes: [
       p('terraform', 0, 50),
-      p('oci', 340, 50),
+      p('oci', 510, 50),
       p('warp', 1020, 50),
       p('secrets', 0, 280),
-      p('k3s', 680, 280),
+      p('k3s', 510, 280),
       p('tls', 1020, 280),
-      p('longhorn', 340, 510),
-      p('clickhouse', 680, 510),
-      p('postgres', 1020, 510),
+      p('longhorn', 510, 510),
+      p('clickhouse', 0, 710),
+      p('postgres', 1020, 710),
     ],
     edges: [
       e('terraform', 'oci', 'purple'),
-      e('oci', 'k3s', 'purple', 'bootstrap', {
+      e('oci', 'k3s', 'purple', 'Bootstrap', {
         source: 'bottom',
         target: 'top',
-        targetOffset: -50,
+        channel: 200,
       }),
-      e('warp', 'k3s', 'purple', 'acesso privado', {
+      e('warp', 'k3s', 'purple', 'Acesso privado', {
         source: 'bottom',
         target: 'top',
-        targetOffset: 50,
+        targetOffset: 64,
+        channel: 240,
         dashed: true,
       }),
       e('secrets', 'k3s', 'purple', 'Secrets', { dashed: true }),
-      e('tls', 'k3s', 'cyan', 'TLS + DNS', {
+      e('tls', 'k3s', 'cyan', undefined, {
         source: 'left',
         target: 'right',
         dashed: true,
       }),
       e('k3s', 'longhorn', 'amber', 'CSI', { source: 'bottom', target: 'top' }),
-      e('longhorn', 'clickhouse', 'amber'),
+      e('longhorn', 'clickhouse', 'amber', undefined, {
+        source: 'bottom',
+        target: 'top',
+        sourceOffset: -50,
+      }),
       e('longhorn', 'postgres', 'amber', undefined, {
         source: 'bottom',
-        target: 'bottom',
+        target: 'top',
+        sourceOffset: 50,
       }),
-    ],
-  },
-]
-
-export const STACK_GROUPS = [
-  {
-    number: '01',
-    title: 'Produtos & aplicações',
-    tone: 'cyan',
-    items: [
-      'Angular',
-      'React',
-      'Vite',
-      'TypeScript',
-      'Go',
-      'Gin',
-      'Node.js',
-      'Express',
-      'Prisma',
-      'Passport',
-      'Google OAuth',
-      'Spotify API',
-      'NGINX',
-    ],
-  },
-  {
-    number: '02',
-    title: 'Cloud & rede',
-    tone: 'purple',
-    items: [
-      'Oracle Cloud',
-      'Ampere A1 / ARM64',
-      'Ubuntu LTS',
-      'VCN + subnets',
-      'OCI NLB',
-      'OCI Cloud Controller',
-      'Cloudflare',
-      'WARP',
-      'Cloudflare Tunnel',
-    ],
-  },
-  {
-    number: '03',
-    title: 'Entrega & configuração',
-    tone: 'purple',
-    items: [
-      'Terraform',
-      'HCP Terraform',
-      'cloud-init',
-      'GitHub Actions',
-      'Docker Buildx',
-      'Docker Hub',
-      'Helm',
-      'Argo CD',
-      'Image Updater',
-      'SOPS',
-      'age',
-      'govulncheck',
-      'npm audit',
-    ],
-  },
-  {
-    number: '04',
-    title: 'Kubernetes & persistência',
-    tone: 'amber',
-    items: [
-      'K3s',
-      'Gateway API',
-      'NGINX Gateway Fabric',
-      'cert-manager',
-      'Let’s Encrypt',
-      'external-dns',
-      'CoreDNS',
-      'metrics-server',
-      'HPA',
-      'Longhorn CSI',
-      'CloudNativePG',
-      'PostgreSQL',
-    ],
-  },
-  {
-    number: '05',
-    title: 'Coleta & instrumentação',
-    tone: 'green',
-    items: [
-      'OpenTelemetry SDKs',
-      'OTLP',
-      'OTel Collector Contrib',
-      'k8sattributes',
-      'Hostmetrics',
-      'kubelet / cAdvisor',
-      'kube-state-metrics',
-      'Prometheus scrape',
-      'Filelog',
-    ],
-  },
-  {
-    number: '06',
-    title: 'Observabilidade & exploração',
-    tone: 'green',
-    items: [
-      'ClickHouse',
-      'ClickHouse Operator',
-      'ClickHouse Keeper',
-      'Grafana',
-      'ClickHouse datasource',
-      'Logs ↔ traces / trace_id',
     ],
   },
 ]

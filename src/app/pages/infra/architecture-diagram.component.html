@@ -1,4 +1,8 @@
-<div class="architecture-frame" #frame>
+<div
+  class="architecture-frame"
+  #frame
+  [style.--diagram-height]="diagramHeight + 'px'"
+>
   <div class="diagram-toolbar">
     <span class="diagram-label"
       ><span class="map-dot"></span> MAPA INTERATIVO</span
@@ -81,4 +85,5 @@
       >Arraste para explorar <span>· Ctrl/⌘ + scroll para zoom</span></span
     >
   </div>
+  <ng-content></ng-content>
 </div>

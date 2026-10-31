@@ -72,7 +72,7 @@
   }
   .diagram-stage {
     width: 100%;
-    height: 840px;
+    height: var(--diagram-height, 840px);
     overflow: hidden;
   }
   .architecture-canvas {

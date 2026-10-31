@@ -1,37 +1,39 @@
-<div
-  class="tech"
-  data-scroll
-  data-scroll-offset="10%, 10%"
-  data-scroll
-  data-scroll-class="c-scroll-opacity"
+<section
+  class="technologies-section"
+  id="technologies"
+  aria-labelledby="technologies-title"
 >
-  <h2>Tecnologia e Ferramentas</h2>
-
-  <div class="category">
-    @for (categoryGroup of filteredListByCategory() ; track 'category-' +
-    categoryGroup){
-
-    <section data-scroll>
-      <h3>{{ categoryGroup[0].category | capitalizeFirstLetter }}</h3>
-
-      <div class="technology-list">
-        @for (technology of categoryGroup ; track technology.name){
-        <app-technology [technology]="technology"></app-technology>
-        }
-      </div>
-    </section>
+  <div class="section-heading"
+    ><div
+      ><div class="eyebrow">TECNOLOGIAS / DA EXPERIÊNCIA À PRÁTICA</div
+      ><h2 id="technologies-title">A stack por trás do trabalho.</h2></div
+    ><p
+      >Ferramentas usadas em serviços, plataformas de dados<br />e na
+      infraestrutura que os mantém em produção.</p
+    ></div
+  >
+  <div class="technology-grid">
+    @for (group of groups; track group.number) {
+      <article class="technology-group" [attr.data-tone]="group.tone"
+        ><div class="group-heading"
+          ><span class="group-mark">{{ group.mark }}</span
+          ><h3>{{ group.title }}</h3
+          ><span class="group-number">{{ group.number }}</span></div
+        ><p>{{ group.description }}</p
+        ><div class="technology-tags" [attr.aria-label]="group.title">
+          @for (tool of group.tools; track tool) {
+            <span>{{ tool }}</span>
+          }
+        </div></article
+      >
     }
   </div>
-  <footer data-scroll>
-    <button class="btn show-more" (click)="toggleRelevanceFilter()">
-      <span>{{ showRelevantOnly() ? 'Mostrar tudo' : 'Mostra menos' }}</span>
-      <img
-        loading="lazy"
-        [class]="{ 'rotate-180': !showRelevantOnly() }"
-        width="20"
-        src="assets/arrow.png"
-        alt=">"
-      />
-    </button>
-  </footer>
-</div>
+  <div class="practices"
+    ><span>ARQUITETURA & MÉTODO</span
+    ><div>
+      @for (practice of practices; track practice) {
+        <span>{{ practice }}</span>
+      }
+    </div></div
+  >
+</section>

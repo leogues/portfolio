@@ -15,6 +15,11 @@ import {
 import type { Graph } from '@antv/x6'
 import { DiagramEdge, DiagramFlow, INFRA_NODES, Tone } from './infra.data'
 
+export interface ComponentSelection {
+  id: string
+  anchor?: DOMRect
+}
+
 type Side = NonNullable<DiagramEdge['source']>
 const COLORS: Record<Tone, string> = {
   purple: '#b89aff',
@@ -29,11 +34,44 @@ const DIRECTIONS: Record<Side, { x: number; y: number }> = {
   right: { x: 1, y: 0 },
 }
 
-function anchor(side: Side, offset = 0) {
+function anchor(side: Side, offset = 0, gap = 8) {
+  const direction = DIRECTIONS[side]
   return {
     name: side,
-    args: side === 'top' || side === 'bottom' ? { dx: offset } : { dy: offset },
+    args: {
+      dx: direction.x * gap + (direction.y ? offset : 0),
+      dy: direction.y * gap + (direction.x ? offset : 0),
+    },
   }
+}
+
+function roundedRoute(points: { x: number; y: number }[], radius = 18): string {
+  const route = points.filter(
+    (point, index) =>
+      index === 0 ||
+      point.x !== points[index - 1].x ||
+      point.y !== points[index - 1].y,
+  )
+  let path = `M ${route[0].x} ${route[0].y}`
+  for (let i = 1; i < route.length - 1; i++) {
+    const previous = route[i - 1],
+      corner = route[i],
+      next = route[i + 1]
+    const incoming = Math.hypot(corner.x - previous.x, corner.y - previous.y)
+    const outgoing = Math.hypot(next.x - corner.x, next.y - corner.y)
+    const r = Math.min(radius, incoming / 2, outgoing / 2)
+    const entry = {
+      x: corner.x + ((previous.x - corner.x) * r) / incoming,
+      y: corner.y + ((previous.y - corner.y) * r) / incoming,
+    }
+    const exit = {
+      x: corner.x + ((next.x - corner.x) * r) / outgoing,
+      y: corner.y + ((next.y - corner.y) * r) / outgoing,
+    }
+    path += ` L ${entry.x} ${entry.y} Q ${corner.x} ${corner.y} ${exit.x} ${exit.y}`
+  }
+  const end = route[route.length - 1]
+  return `${path} L ${end.x} ${end.y}`
 }
 
 @Component({
@@ -48,7 +86,7 @@ export class ArchitectureDiagramComponent
 {
   @Input({ required: true }) flow!: DiagramFlow
   @Input() selectedId = 'apps'
-  @Output() selected = new EventEmitter<string>()
+  @Output() selected = new EventEmitter<ComponentSelection>()
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLDivElement>
   @ViewChild('stage', { static: true }) stage!: ElementRef<HTMLDivElement>
   @ViewChild('frame', { static: true }) frame!: ElementRef<HTMLDivElement>
@@ -60,6 +98,14 @@ export class ArchitectureDiagramComponent
   private destroyed = false
   private fitFrame = 0
 
+  get diagramHeight(): number {
+    return (
+      Math.max(
+        ...this.flow.lanes.map((lane) => lane.y + (lane.height || 190)),
+      ) + 80
+    )
+  }
+
   constructor(private zone: NgZone) {}
 
   async ngAfterViewInit(): Promise<void> {
@@ -67,20 +113,55 @@ export class ArchitectureDiagramComponent
       const { Graph } = await import('@antv/x6')
       if (this.destroyed) return
       Graph.registerConnector(
-        'portfolio-curve',
+        'portfolio-route',
         (
           start,
           end,
           _route,
-          options: { raw?: boolean; sourceSide?: Side; targetSide?: Side },
+          options: {
+            raw?: boolean
+            sourceSide?: Side
+            targetSide?: Side
+            channel?: number
+          },
         ) => {
           const source = DIRECTIONS[options.sourceSide || 'right']
           const target = DIRECTIONS[options.targetSide || 'left']
-          const distance = Math.min(
-            160,
-            Math.max(45, Math.hypot(end.x - start.x, end.y - start.y) * 0.45),
+          if (
+            (start.x === end.x && source.y && target.y) ||
+            (start.y === end.y && source.x && target.x)
           )
-          return `M ${start.x} ${start.y} C ${start.x + source.x * distance} ${start.y + source.y * distance}, ${end.x + target.x * distance} ${end.y + target.y * distance}, ${end.x} ${end.y}`
+            return roundedRoute([start, end])
+          let bends: { x: number; y: number }[]
+          if (source.y && target.y) {
+            const channel =
+              options.channel ??
+              (source.y === target.y
+                ? source.y > 0
+                  ? Math.max(start.y, end.y) + 84
+                  : Math.min(start.y, end.y) - 84
+                : (start.y + end.y) / 2)
+            bends = [
+              { x: start.x, y: channel },
+              { x: end.x, y: channel },
+            ]
+          } else if (source.x && target.x) {
+            const channel =
+              options.channel ??
+              (source.x === target.x
+                ? source.x > 0
+                  ? Math.max(start.x, end.x) + 84
+                  : Math.min(start.x, end.x) - 84
+                : (start.x + end.x) / 2)
+            bends = [
+              { x: channel, y: start.y },
+              { x: channel, y: end.y },
+            ]
+          } else
+            bends = source.y
+              ? [{ x: start.x, y: end.y }]
+              : [{ x: end.x, y: start.y }]
+          return roundedRoute([start, ...bends, end])
         },
         true,
       )
@@ -103,14 +184,14 @@ export class ArchitectureDiagramComponent
           },
           scaling: { min: 0.2, max: 1.8 },
           connecting: {
-            connectionPoint: { name: 'boundary', args: { offset: 6 } },
+            connectionPoint: { name: 'anchor' },
           },
           interacting: false,
           async: false,
         })
         this.graph.on('node:click', ({ node }) => {
           if (INFRA_NODES.some((item) => item.id === node.id))
-            this.zone.run(() => this.selected.emit(node.id))
+            this.zone.run(() => this.selectComponent(node.id))
         })
         this.graph.on('scale', ({ sx }) =>
           this.zone.run(() => {
@@ -278,26 +359,29 @@ export class ArchitectureDiagramComponent
         zIndex: 1,
         source: {
           cell: edge.from,
-          anchor: anchor(edge.source || 'right', edge.sourceOffset),
+          anchor: anchor(edge.source || 'right', edge.sourceOffset, 4),
         },
         target: {
           cell: edge.to,
-          anchor: anchor(edge.target || 'left', edge.targetOffset),
+          anchor: anchor(edge.target || 'left', edge.targetOffset, 4),
         },
         connector: {
-          name: 'portfolio-curve',
+          name: 'portfolio-route',
           args: {
             sourceSide: edge.source || 'right',
             targetSide: edge.target || 'left',
+            channel: edge.channel,
           },
         },
         attrs: {
           line: {
             stroke: COLORS[edge.tone],
-            strokeWidth: 1.7,
-            strokeOpacity: 0.7,
-            strokeDasharray: edge.dashed ? '4 6' : '',
-            targetMarker: { name: 'block', width: 7, height: 6 },
+            strokeWidth: 2,
+            strokeOpacity: 0.82,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+            strokeDasharray: edge.dashed ? '5 7' : '',
+            targetMarker: { name: 'block', width: 8, height: 8 },
           },
         },
         labels: edge.label
@@ -305,7 +389,7 @@ export class ArchitectureDiagramComponent
               {
                 position: {
                   distance: edge.labelPosition ?? 0.5,
-                  offset: edge.labelOffset ?? -16,
+                  offset: 0,
                 },
                 attrs: {
                   label: {
@@ -315,10 +399,17 @@ export class ArchitectureDiagramComponent
                     fill: COLORS[edge.tone],
                   },
                   body: {
-                    fill: '#1b1428',
-                    stroke: '#1b1428',
-                    strokeWidth: 6,
-                    rx: 4,
+                    ref: 'label',
+                    refWidth: 12,
+                    refHeight: 8,
+                    refX: -6,
+                    refY: -4,
+                    fill: '#251b33',
+                    stroke: COLORS[edge.tone],
+                    strokeOpacity: 0.25,
+                    strokeWidth: 1,
+                    rx: 5,
+                    ry: 5,
                   },
                 },
               },
@@ -349,12 +440,19 @@ export class ArchitectureDiagramComponent
     }
   }
 
+  private selectComponent(id: string): void {
+    const element = this.canvas.nativeElement.querySelector(
+      `[data-node="${id}"]`,
+    )
+    this.selected.emit({ id, anchor: element?.getBoundingClientRect() })
+  }
+
   onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter' && event.key !== ' ') return
     const id = (event.target as Element).getAttribute('data-node')
     if (id) {
       event.preventDefault()
-      this.selected.emit(id)
+      this.selectComponent(id)
     }
   }
 

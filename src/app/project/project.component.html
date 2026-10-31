@@ -1,67 +1,40 @@
-<section
-  [ngClass]="customClass"
-  class="project-item"
-  data-scroll
-  data-scroll-offset="10%, 10%"
-  data-scroll-class="c-scroll-opacity"
->
-  <div class="project-content">
-    <header>
-      <span>Projeto em destaque</span>
-      <a [href]="project().demo" target="_blank">
-        <h3>{{ project().title }}</h3>
-      </a>
-    </header>
-    <article>{{ project().description }} </article>
-    <div class="techs">
-      @for(tech of techsInProject(); track tech) {
-      <a [href]="tech.link" target="_blank"
-        ><img
-          loading="lazy"
-          [src]="tech.image"
-          [class]="{
-            'dark': tech.isDarkImage,
-          }"
-          width="22"
-          height="22"
-          alt="tech"
-      /></a>
-
-      }
-    </div>
-
-    <footer>
-      <a [href]="project().github" target="_blank">
-        <img
-          loading="lazy"
-          width="20"
-          height="20"
-          src="./assets/github.svg"
-          alt="github"
-        />
-      </a>
-      <a [href]="project().demo" target="_blank">
-        <img
-          loading="lazy"
-          width="23"
-          height="23"
-          src="./assets/external-link.svg"
-          alt="Ir"
-        />
-      </a>
-    </footer>
-  </div>
-  <div class="project-image">
-    <a [href]="project().demo" target="_blank">
-      <div class="image-container">
-        <img
-          [ngSrc]="project().picture"
-          width="636.183"
-          height="441.233"
-          alt="project-example"
-        />
-        <div class="background-blur"></div>
-      </div>
-    </a>
-  </div>
-</section>
+<article class="project-card" [attr.data-tone]="project.tone">
+  <a
+    class="project-preview"
+    [href]="project.demo"
+    target="_blank"
+    rel="noopener noreferrer"
+    [attr.aria-label]="'Abrir ' + project.title"
+    ><div class="preview-toolbar"
+      ><span><i></i><i></i><i></i></span><span>{{ project.title }}</span
+      ><span aria-hidden="true"></span></div
+    ><img
+      loading="lazy"
+      [src]="project.picture"
+      [alt]="project.pictureAlt"
+      width="636"
+      height="441"
+  /></a>
+  <div class="project-content"
+    ><div class="project-category"
+      ><span>{{ project.category }}</span
+      ><span>{{ project.number }}</span></div
+    ><h3>{{ project.title }}</h3
+    ><p>{{ project.description }}</p
+    ><div class="project-tools">
+      @for (tool of project.tools; track tool) {
+        <span>{{ tool }}</span>
+      }</div
+    ><div class="project-links"
+      ><a [href]="project.demo" target="_blank" rel="noopener noreferrer"
+        >Ver projeto</a
+      ><a
+        [href]="project.github"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="'Código do ' + project.title"
+        >Ver código</a
+      ></div
+    ></div
+  >
+</article>

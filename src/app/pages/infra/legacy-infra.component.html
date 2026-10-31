@@ -1,0 +1,39 @@
+<section class="legacy-intro" aria-labelledby="legacy-title">
+  <div class="legacy-copy">
+    <div class="eyebrow"
+      ><span class="eyebrow-line"></span> INFRAESTRUTURA / V1</div
+    >
+    <h1 id="legacy-title"><span>Hostinger.</span></h1>
+    <p
+      >Portfolio, MusicHub e LiveLink em uma VPS Hostinger, com Docker Compose,
+      NGINX na entrada e deploy por GitHub Actions e SSH.</p
+    >
+    <div class="legacy-products" aria-label="Produtos da V1"
+      ><span>Portfolio <i>Angular</i></span
+      ><span>MusicHub <i>Angular + Go</i></span
+      ><span>LiveLink <i>React + Node.js</i></span></div
+    >
+    <a
+      class="explore-link"
+      href="/infra?v=1#architecture"
+      (click)="explore.emit($event)"
+      >Explore a arquitetura <span>↘</span></a
+    >
+  </div>
+  <div class="legacy-platform" aria-hidden="true"
+    ><img src="./assets/techs/docker.svg" alt="" /><div
+      ><strong>Docker Compose</strong><span>VPS HOSTINGER</span></div
+    ></div
+  >
+</section>
+<section
+  class="legacy-diagram"
+  id="architecture"
+  aria-label="Diagrama original da arquitetura V1"
+>
+  <img
+    loading="lazy"
+    src="./assets/infra.png"
+    alt="Diagrama original da V1: Cloudflare e NGINX direcionam o acesso ao Portfolio, MusicHub e LiveLink em Docker Compose na VPS Hostinger. GitHub Actions publica as imagens no Docker Hub e aciona os scripts de deploy por SSH."
+  />
+</section>

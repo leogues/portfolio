@@ -1,9 +1,7 @@
 <app-header></app-header>
-<main [class.infra-page]="version === 2" [class.legacy-page]="version === 1">
-  <div class="page-topline" [class.legacy-topline]="version === 1">
-    @if (version === 2) {
-      <a class="back-link" href="/">← <span>leogues</span> / infraestrutura</a>
-    }
+<main class="infra-page" [class.legacy-page]="version === 1">
+  <div class="page-topline">
+    <a class="back-link" href="/">← <span>leogues</span> / infraestrutura</a>
     <div class="version-switch" role="group" aria-label="Versão da arquitetura">
       <button
         type="button"
@@ -33,7 +31,10 @@
           >A infraestrutura que conecta meu portfólio, MusicHub e LiveLink. Do
           commit ao deploy, da requisição à observabilidade.</p
         >
-        <a class="explore-link" href="#architecture"
+        <a
+          class="explore-link"
+          href="/infra#architecture"
+          (click)="exploreArchitecture($event)"
           >Explore a arquitetura <span>↘</span></a
         >
       </div>
@@ -149,8 +150,33 @@
           <app-architecture-diagram
             [flow]="flow"
             [selectedId]="selectedId"
-            (selected)="selectedId = $event"
-          ></app-architecture-diagram>
+            (selected)="openComponent($event.id, $event.anchor)"
+          >
+            <div
+              #componentPopover
+              popover="auto"
+              class="component-card component-popover"
+              [attr.data-tone]="selectedNode.tone"
+              role="dialog"
+              [attr.aria-label]="selectedNode.name"
+            >
+              <ng-container
+                [ngTemplateOutlet]="componentContent"
+              ></ng-container>
+            </div>
+            <dialog
+              #componentDialog
+              class="component-card component-modal"
+              [attr.data-tone]="selectedNode.tone"
+              [attr.aria-label]="selectedNode.name"
+              (click)="closeOnBackdrop($event)"
+              (close)="onDialogClosed()"
+            >
+              <ng-container
+                [ngTemplateOutlet]="componentContent"
+              ></ng-container>
+            </dialog>
+          </app-architecture-diagram>
           <details class="component-list"
             ><summary
               >Ver componentes <span>{{ visibleNodes.length }}</span
@@ -163,32 +189,12 @@
                   type="button"
                   [class.active]="selectedId === node.id"
                   [attr.aria-pressed]="selectedId === node.id"
-                  (click)="selectedId = node.id"
+                  (click)="openFromList(node.id, $event)"
                   >{{ node.name }}</button
                 >
               }
             </div>
           </details>
-          <div
-            class="component-detail"
-            [attr.data-tone]="selectedNode.tone"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <div class="detail-identity"
-              ><span class="component-mark">{{ selectedNode.mark }}</span
-              ><div
-                ><span class="detail-category">{{ selectedNode.category }}</span
-                ><h4>{{ selectedNode.name }}</h4></div
-              ></div
-            >
-            <p>{{ selectedNode.description }}</p>
-            <ul>
-              @for (fact of selectedNode.facts; track fact) {
-                <li>{{ fact }}</li>
-              }
-            </ul>
-          </div>
         </div>
       </div>
       <aside class="clickhouse-note" aria-labelledby="clickhouse-purpose">
@@ -205,39 +211,41 @@
       </aside>
     </section>
 
-    <section class="stack-section" aria-labelledby="stack-title">
-      <div class="section-heading"
-        ><div
-          ><div class="eyebrow">CADA PEÇA TEM UM PAPEL</div
-          ><h2 id="stack-title">A stack completa.</h2></div
-        ><p
-          >Dos produtos à operação.<br />As ferramentas que sustentam cada
-          camada.</p
-        ></div
-      >
-      <div class="stack-grid">
-        @for (group of stack; track group.number) {
-          <article class="stack-card" [attr.data-tone]="group.tone"
-            ><div class="stack-card-title"
-              ><span>{{ group.number }}</span
-              ><h3>{{ group.title }}</h3
-              ><i></i></div
-            ><div class="stack-tags">
-              @for (item of group.items; track item) {
-                <span>{{ item }}</span>
-              }
-            </div></article
+    <ng-template #componentContent>
+      <div class="dialog-heading"
+        ><div class="detail-identity"
+          ><span class="component-mark">{{ selectedNode.mark }}</span
+          ><div
+            ><span class="detail-category">{{ selectedNode.category }}</span
+            ><h3>{{ selectedNode.name }}</h3></div
+          ></div
+        ><button
+          type="button"
+          class="dialog-close"
+          aria-label="Fechar detalhes"
+          (click)="closeComponent()"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
           >
+            <path d="m6 6 12 12M18 6 6 18" /></svg></button
+      ></div>
+      <p>{{ selectedNode.description }}</p>
+      <ul>
+        @for (fact of selectedNode.facts; track fact) {
+          <li>{{ fact }}</li>
         }
-      </div>
-    </section>
+      </ul>
+    </ng-template>
   } @else {
-    <div class="container">
-      <div class="wrapper">
-        <img loading="lazy" src="./assets/infra.png" alt="Infra" />
-      </div>
-    </div>
+    <app-legacy-infra
+      (explore)="exploreArchitecture($event)"
+    ></app-legacy-infra>
   }
+
   @if (version === 2) {
     <footer class="infra-footer"
       ><a href="/">Leonardo Rodrigues<span>Full Stack Developer</span></a

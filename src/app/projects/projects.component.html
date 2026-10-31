@@ -1,15 +1,52 @@
-<div
+<section
+  class="projects-section"
   id="projects"
-  class="projects"
-  data-scroll
-  data-scroll-offset="10%, 10%"
-  data-scroll-class="c-scroll-opacity"
+  aria-labelledby="projects-title"
 >
-  <h2>Meus projetos</h2>
-
-  <div class="project-list">
-    @for(project of projects(); let odd = $odd; track project.id){
-    <app-project [project]="project" [ngClass]="{ odd: odd }" />
+  <div class="section-heading"
+    ><div
+      ><div class="eyebrow">PROJETOS / CÓDIGO EM PRODUÇÃO</div
+      ><h2 id="projects-title">Da aplicação à infraestrutura.</h2></div
+    ><p
+      >Projetos próprios que conectam desenvolvimento,<br />entrega e
+      operação.</p
+    ></div
+  >
+  <a class="infra-feature" routerLink="/infra"
+    ><div class="infra-feature-copy"
+      ><span class="feature-label">ARQUITETURA EM DESTAQUE</span
+      ><h3>Uma plataforma.<br /><span>Três produtos conectados.</span></h3
+      ><p
+        >Do provisionamento à observabilidade: a evolução de uma VPS com Docker
+        Compose para uma plataforma Kubernetes na Oracle Cloud.</p
+      ><div class="feature-tools"
+        ><span>Terraform</span><span>K3s</span><span>Argo CD</span
+        ><span>OpenTelemetry</span><span>ClickHouse</span></div
+      ><span class="feature-action"
+        >Explore a arquitetura <span>↗</span></span
+      ></div
+    ><div class="infra-feature-art" aria-hidden="true"
+      ><div class="infra-ring"></div
+      ><div class="infra-core"
+        ><svg
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="m32 5 24 14v27L32 60 8 46V19L32 5Z" />
+          <path
+            d="m8 19 24 14 24-14M32 33v27m0-55v15m-13 6 13-7 13 7v15l-13 7-13-7V26Z"
+          /></svg
+        ><strong>K3s</strong><span>ORACLE CLOUD · ARM64</span></div
+      ><span class="mini-service service-music">MusicHub</span
+      ><span class="mini-service service-live">LiveLink</span
+      ><span class="mini-service service-portfolio">Portfolio</span></div
+    ></a
+  >
+  <div class="project-grid">
+    @for (project of projects; track project.id) {
+      <app-project [project]="project"></app-project>
     }
   </div>
-</div>
+</section>

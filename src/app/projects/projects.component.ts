@@ -1,16 +1,15 @@
-import { Component, effect, inject } from '@angular/core'
+import { Component } from '@angular/core'
+import { RouterLink } from '@angular/router'
 import { ProjectComponent } from '../project/project.component'
-import { CommonModule } from '@angular/common'
-import { ProjectService } from '../service/project.service'
+import { HOME_PROJECTS } from '../pages/home/home.data'
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [ProjectComponent],
+  imports: [ProjectComponent, RouterLink],
   templateUrl: './projects.component.html',
   styleUrl: './projects.component.scss',
 })
 export class ProjectsComponent {
-  private projectService = inject(ProjectService)
-  protected projects = this.projectService.projetcs.data
+  readonly projects = HOME_PROJECTS
 }

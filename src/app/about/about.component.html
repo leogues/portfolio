@@ -1,16 +1,41 @@
-<div
-  class="developer-info"
-  data-scroll
-  data-scroll-offset="10%, 10%"
-  data-scroll-class="c-scroll-opacity"
->
-  <div class="info" data-scroll>
-    <h2>Sobre mim</h2>
-    <p>
-      Olá! Meu nome é Leonardo sou um desenvolvedor Full Stack. Considero
-      difícil se definir, pois acredito que estamos em constante mudança.
-      Prefiro continuar aprendendo, me desafiando e realizando projetos
-      interessantes.
-    </p>
+<section class="about-section" id="about" aria-labelledby="about-title">
+  <div class="about-intro">
+    <div class="about-heading">
+      <div class="eyebrow">SOBRE / MINHA ATUAÇÃO</div>
+      <h2 id="about-title"
+        >Software, dados<br /><span>e infraestrutura.</span></h2
+      >
+    </div>
+    <div class="about-copy">
+      <p
+        >Desenvolvo sistemas distribuídos e plataformas de dados, da arquitetura
+        à operação em nuvem.</p
+      >
+      <p
+        >Trabalho na evolução de serviços, pipelines e bancos de dados, com foco
+        em performance, confiabilidade e custos. Isso inclui migrações em grande
+        escala, otimização de consultas e redução do consumo de recursos em
+        produção.</p
+      >
+      <a
+        href="https://www.linkedin.com/in/leogues/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Conheça minha trajetória</a
+      >
+    </div>
   </div>
-</div>
+  <div class="results-heading">
+    <span class="eyebrow">RESULTADOS EM PRODUÇÃO</span>
+    <span>Ganhos em performance e uso de recursos.</span>
+  </div>
+  <div class="results-grid">
+    @for (result of results; track result.title) {
+      <article class="result-card" [attr.data-tone]="result.tone">
+        <strong>{{ result.value }}</strong>
+        <h3>{{ result.title }}</h3>
+        <p>{{ result.detail }}</p>
+      </article>
+    }
+  </div>
+</section>
