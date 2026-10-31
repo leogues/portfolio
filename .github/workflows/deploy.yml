@@ -1,8 +1,11 @@
-name: Deploy to VPS
+name: Publish GitOps image
 
 on:
   push:
     branches: ['main']
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -29,14 +32,3 @@ jobs:
           tags: leogues/portfolio-frontend:latest, leogues/portfolio-frontend:${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: SSH Deploy script
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST}}
-          username: ${{ secrets.SSH_USERNAME}}
-          password: ${{ secrets.SSH_PASSWORD}}
-          script: |
-            cd ../srv/portfolio
-            chmod +x deploy-script
-            ./deploy-script

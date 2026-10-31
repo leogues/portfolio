@@ -1,7 +1,271 @@
 <app-header></app-header>
-
-<div class="container">
-  <div class="wrapper">
-    <img loading="lazy" src="./assets/infra.png" alt="Infra" />
+<main [class.infra-page]="version === 2" [class.legacy-page]="version === 1">
+  <div class="page-topline" [class.legacy-topline]="version === 1">
+    @if (version === 2) {
+      <a class="back-link" href="/">← <span>leogues</span> / infraestrutura</a>
+    }
+    <div class="version-switch" role="group" aria-label="Versão da arquitetura">
+      <button
+        type="button"
+        [class.active]="version === 1"
+        [attr.aria-pressed]="version === 1"
+        (click)="setVersion(1)"
+        >V1 <span>Origem</span></button
+      >
+      <button
+        type="button"
+        [class.active]="version === 2"
+        [attr.aria-pressed]="version === 2"
+        (click)="setVersion(2)"
+        >V2 <span>Atual</span><i></i
+      ></button>
+    </div>
   </div>
-</div>
+
+  @if (version === 2) {
+    <section class="infra-hero" aria-labelledby="infra-title">
+      <div class="hero-copy">
+        <div class="eyebrow"
+          ><span class="eyebrow-line"></span> INFRAESTRUTURA / V2</div
+        >
+        <h1 id="infra-title">Por trás de<br /><span>cada conexão.</span></h1>
+        <p
+          >A infraestrutura que conecta meu portfólio, MusicHub e LiveLink. Do
+          commit ao deploy, da requisição à observabilidade.</p
+        >
+        <a class="explore-link" href="#architecture"
+          >Explore a arquitetura <span>↘</span></a
+        >
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit orbit-outer"></div
+        ><div class="orbit orbit-inner"></div>
+        <div class="orbit-track track-one"></div
+        ><div class="orbit-track track-two"></div>
+        <div class="orbit-badge badge-go"><span>Go</span> MusicHub</div>
+        <div class="orbit-badge badge-node"><span>JS</span> LiveLink</div>
+        <div class="orbit-badge badge-otel"><span>◎</span> OpenTelemetry</div>
+        <div class="cluster-core"
+          ><svg viewBox="0 0 64 64" fill="none">
+            <path
+              d="m32 5 24 14v27L32 60 8 46V19L32 5Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="m8 19 24 14 24-14M32 33v27m0-55v15m-13 6 13-7 13 7v15l-13 7-13-7V26Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            /></svg
+          ><strong>K3s</strong><span>ORACLE CLOUD · ARM64</span></div
+        >
+        <div class="visual-caption"
+          ><span></span> Código, infraestrutura e contexto.</div
+        >
+      </div>
+    </section>
+
+    <div class="infra-facts" aria-label="Arquitetura em números">
+      <div
+        ><strong>03</strong
+        ><span
+          >produtos<span class="fact-note"
+            >Portfolio · MusicHub · LiveLink</span
+          ></span
+        ></div
+      >
+      <div
+        ><strong>02</strong
+        ><span>backends<span class="fact-note">Go + Node.js</span></span></div
+      >
+      <div
+        ><strong>01</strong
+        ><span
+          >cluster K3s<span class="fact-note"
+            >2 OCPUs · 12 GB · ARM64</span
+          ></span
+        ></div
+      >
+      <div
+        ><strong>03</strong
+        ><span
+          >sinais<span class="fact-note">Logs · traces · métricas</span></span
+        ></div
+      >
+    </div>
+
+    <section
+      class="architecture-section"
+      id="architecture"
+      aria-labelledby="architecture-title"
+    >
+      <div class="section-heading"
+        ><div
+          ><div class="eyebrow">O SISTEMA EM CAMADAS</div
+          ><h2 id="architecture-title">Tudo conectado.</h2></div
+        ><p
+          >Cinco perspectivas da mesma arquitetura.<br />Selecione um componente
+          para conhecer seu papel.</p
+        ></div
+      >
+      <div class="architecture-workspace">
+        <div
+          class="flow-tabs"
+          role="tablist"
+          aria-label="Fluxos da arquitetura"
+        >
+          @for (item of flows; track item.id; let index = $index) {
+            <button
+              type="button"
+              role="tab"
+              [id]="'flow-' + item.id"
+              [class.active]="flow.id === item.id"
+              [attr.aria-selected]="flow.id === item.id"
+              [attr.tabindex]="flow.id === item.id ? 0 : -1"
+              aria-controls="flow-panel"
+              (click)="setFlow(item)"
+              (keydown)="onTabKey($event, index)"
+              ><span>{{ item.number }}</span
+              >{{ item.label }}</button
+            >
+          }
+        </div>
+        <div
+          role="tabpanel"
+          id="flow-panel"
+          [attr.aria-labelledby]="'flow-' + flow.id"
+        >
+          <div class="flow-heading"
+            ><div
+              ><h3>{{ flow.title }}</h3
+              ><p>{{ flow.description }}</p></div
+            ><span class="flow-counter"
+              >{{ flow.number }}<span> / 05</span></span
+            ></div
+          >
+          <app-architecture-diagram
+            [flow]="flow"
+            [selectedId]="selectedId"
+            (selected)="selectedId = $event"
+          ></app-architecture-diagram>
+          <div class="component-picker" aria-label="Componentes deste fluxo">
+            <span>EXPLORAR</span>
+            @for (node of visibleNodes; track node.id) {
+              <button
+                type="button"
+                [class.active]="selectedId === node.id"
+                [attr.aria-pressed]="selectedId === node.id"
+                (click)="selectedId = node.id"
+                >{{ node.name }}</button
+              >
+            }
+          </div>
+          <div
+            class="component-detail"
+            [attr.data-tone]="selectedNode.tone"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div class="detail-identity"
+              ><span class="component-mark">{{ selectedNode.mark }}</span
+              ><div
+                ><span class="detail-category">{{ selectedNode.category }}</span
+                ><h4>{{ selectedNode.name }}</h4></div
+              ></div
+            >
+            <p>{{ selectedNode.description }}</p>
+            <ul>
+              @for (fact of selectedNode.facts; track fact) {
+                <li>{{ fact }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="flow-steps">
+        @for (step of flow.steps; track step.title; let index = $index) {
+          <article
+            ><span class="step-number">0{{ index + 1 }} <span>──</span></span
+            ><h3>{{ step.title }}</h3
+            ><p>{{ step.text }}</p></article
+          >
+        }
+      </div>
+    </section>
+
+    <section class="stack-section" aria-labelledby="stack-title">
+      <div class="section-heading"
+        ><div
+          ><div class="eyebrow">CADA PEÇA TEM UM PAPEL</div
+          ><h2 id="stack-title">A stack completa.</h2></div
+        ><p
+          >Dos produtos à operação.<br />As ferramentas que sustentam cada
+          camada.</p
+        ></div
+      >
+      <div class="stack-grid">
+        @for (group of stack; track group.number) {
+          <article class="stack-card" [attr.data-tone]="group.tone"
+            ><div class="stack-card-title"
+              ><span>{{ group.number }}</span
+              ><h3>{{ group.title }}</h3
+              ><i></i></div
+            ><div class="stack-tags">
+              @for (item of group.items; track item) {
+                <span>{{ item }}</span>
+              }
+            </div></article
+          >
+        }
+      </div>
+    </section>
+
+    <section class="decisions-section" aria-labelledby="decisions-title">
+      <div class="eyebrow">DECISÕES DE ARQUITETURA</div
+      ><h2 id="decisions-title"
+        >Projetada para conectar.<br /><span>Preparada para evoluir.</span></h2
+      >
+      <div class="decision-grid">
+        <article
+          ><span class="decision-symbol">⌘</span><h3>Estado no Git</h3
+          ><p
+            >Terraform provisiona a base. Argo CD reconcilia o cluster. Versões
+            e configuração seguem um histórico rastreável.</p
+          ></article
+        >
+        <article
+          ><span class="decision-symbol">◎</span><h3>Contexto automático</h3
+          ><p
+            >A aplicação emite os sinais; o Collector descobre a identidade no
+            Kubernetes. Logs e traces se conectam pelo trace_id.</p
+          ></article
+        >
+        <article
+          ><span class="decision-symbol">◇</span><h3>Operação integrada</h3
+          ><p
+            >Operadores gerenciam os bancos, volumes preservam os dados e
+            certificados e DNS acompanham as rotas das aplicações.</p
+          ></article
+        >
+      </div>
+    </section>
+  } @else {
+    <div class="container">
+      <div class="wrapper">
+        <img loading="lazy" src="./assets/infra.png" alt="Infra" />
+      </div>
+    </div>
+  }
+  @if (version === 2) {
+    <footer class="infra-footer"
+      ><a href="/">Leonardo Rodrigues<span>Full Stack Developer</span></a
+      ><span>Aplicações, infraestrutura e observabilidade.</span
+      ><a
+        href="https://github.com/leogues"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub ↗</a
+      ></footer
+    >
+  }
+</main>

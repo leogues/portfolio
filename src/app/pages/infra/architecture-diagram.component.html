@@ -1,0 +1,84 @@
+<div class="architecture-frame" #frame>
+  <div class="diagram-toolbar">
+    <span class="diagram-label"
+      ><span class="map-dot"></span> MAPA INTERATIVO</span
+    >
+    <div class="diagram-tools" role="group" aria-label="Controles do diagrama">
+      <button
+        type="button"
+        (click)="changeZoom(-1)"
+        aria-label="Diminuir zoom"
+        title="Diminuir zoom"
+        >−</button
+      >
+      <span class="zoom-value" aria-live="polite">{{ zoom }}%</span>
+      <button
+        type="button"
+        (click)="changeZoom(1)"
+        aria-label="Aumentar zoom"
+        title="Aumentar zoom"
+        >+</button
+      >
+      <span class="tool-divider"></span>
+      <button
+        type="button"
+        (click)="fit()"
+        aria-label="Enquadrar diagrama"
+        title="Enquadrar diagrama"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="toggleFullscreen()"
+        aria-label="Alternar tela cheia"
+        title="Tela cheia"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="diagram-stage" #stage
+    ><div
+      #canvas
+      class="architecture-canvas"
+      role="group"
+      [attr.aria-label]="'Diagrama: ' + flow.label"
+      (keydown)="onKeydown($event)"
+    ></div
+  ></div>
+  @if (loading) {
+    <div class="diagram-message" role="status">Preparando o mapa…</div>
+  }
+  @if (failed) {
+    <div class="diagram-message" role="status"
+      >O mapa não carregou. Explore os componentes e o fluxo logo abaixo.</div
+    >
+  }
+  <div class="diagram-bottom">
+    <div class="diagram-legend"
+      ><span class="purple">Entrega</span><span class="cyan">Tráfego</span
+      ><span class="amber">Dados</span
+      ><span class="green">Telemetria</span></div
+    >
+    <span class="diagram-hint"
+      >Arraste para explorar <span>· Ctrl/⌘ + scroll para zoom</span></span
+    >
+  </div>
+</div>

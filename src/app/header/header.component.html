@@ -14,7 +14,12 @@
       class="nav-item left"
       routerLink="/"
       routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="{
+        paths: 'exact',
+        queryParams: 'ignored',
+        matrixParams: 'ignored',
+        fragment: 'ignored',
+      }"
     >
       <div>Home</div>
     </a>
@@ -22,7 +27,12 @@
       class="nav-item right"
       routerLink="/infra"
       routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="{
+        paths: 'exact',
+        queryParams: 'ignored',
+        matrixParams: 'ignored',
+        fragment: 'ignored',
+      }"
     >
       <div>Infra</div>
     </a>
