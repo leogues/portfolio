@@ -25,7 +25,10 @@ export interface DiagramEdge {
   dashed?: boolean
   source?: 'top' | 'bottom' | 'left' | 'right'
   target?: 'top' | 'bottom' | 'left' | 'right'
-  vertices?: { x: number; y: number }[]
+  sourceOffset?: number
+  targetOffset?: number
+  labelPosition?: number
+  labelOffset?: number
 }
 
 export interface DiagramFlow {
@@ -36,8 +39,6 @@ export interface DiagramFlow {
   description: string
   nodes: { id: string; x: number; y: number }[]
   edges: DiagramEdge[]
-  lanes: { label: string; y: number; width: number }[]
-  steps: { title: string; text: string }[]
 }
 
 function node(
@@ -81,8 +82,36 @@ export const INFRA_NODES: InfraNode[] = [
     'LB',
     'cyan',
     'Rede',
-    'O balanceador público encaminha o tráfego para o gateway no nó privado. O OCI Cloud Controller Manager integra o Service do Kubernetes ao load balancer da Oracle.',
+    'O OCI Cloud Controller Manager provisiona este NLB a partir do Service LoadBalancer criado pelo NGINX Gateway. O balanceador encaminha o tráfego público ao gateway na rede privada.',
     ['Portas 80 / 443', 'OCI Cloud Controller Manager', 'Nó sem IP público'],
+  ),
+  node(
+    'lbservice',
+    'Service LoadBalancer',
+    'Criado pelo NGINX Gateway',
+    'LB',
+    'cyan',
+    'Provisionamento do balanceador',
+    'O NGINX Gateway cria o Service do tipo LoadBalancer. As annotations OCI solicitam um Network Load Balancer, provisionado pelo OCI Cloud Controller Manager.',
+    [
+      'Recurso do Kubernetes',
+      'Owner: Gateway default',
+      'Tipo OCI solicitado: NLB',
+    ],
+  ),
+  node(
+    'ccm',
+    'OCI Cloud Controller',
+    'Provisiona o Oracle NLB',
+    'OCI',
+    'purple',
+    'Integração Kubernetes ↔ OCI',
+    'O OCI Cloud Controller Manager observa o Service LoadBalancer do NGINX Gateway e provisiona o Network Load Balancer na Oracle. O Terraform prepara a rede, o compute e o bootstrap do controller.',
+    [
+      'Service LoadBalancer → NLB',
+      'OCI Cloud Controller Manager',
+      'Rede e compute via Terraform',
+    ],
   ),
   node(
     'gateway',
@@ -177,7 +206,7 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'github',
     'GitHub Actions',
-    'Checks + build multiarch',
+    'Testes + build multiarch',
     'GH',
     'purple',
     'Integração contínua',
@@ -191,7 +220,7 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'registry',
     'Docker Hub',
-    'Imagens com tags de versão',
+    'Imagens versionadas',
     'DH',
     'purple',
     'Registry',
@@ -201,7 +230,7 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'updater',
     'Image Updater',
-    'Nova imagem → commit no Git',
+    'Imagens → versões no Git',
     '↑',
     'purple',
     'Automação de entrega',
@@ -211,7 +240,7 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'gitops',
     'oracle-gitops',
-    'Helm · manifests · valores',
+    'Estado desejado · Helm',
     'git',
     'purple',
     'Estado desejado',
@@ -353,7 +382,7 @@ export const INFRA_NODES: InfraNode[] = [
   node(
     'collector',
     'OTel Collector',
-    'OTLP · coleta · processamento',
+    'OTLP + contexto Kubernetes',
     'OT',
     'green',
     'Pipeline de observabilidade',
@@ -361,7 +390,7 @@ export const INFRA_NODES: InfraNode[] = [
     [
       'DaemonSet no K3s',
       'k8sattributes + batch',
-      'Métricas delta → cumulativas',
+      'Identidade automática dos serviços',
     ],
   ),
   node(
@@ -371,11 +400,11 @@ export const INFRA_NODES: InfraNode[] = [
     'CH',
     'green',
     'Armazenamento de telemetria',
-    'O ClickHouse centraliza os três sinais. Logs e traces usam o exporter nativo; métricas chegam por Prometheus remote write à tabela TimeSeries. O Grafana consulta esses dados por SQL e pela API compatível com Prometheus.',
+    'O ClickHouse reúne logs, traces e métricas em um único motor para reduzir o uso de memória, CPU e armazenamento da observabilidade no cluster. Armazenamento colunar e compressão completam essa escolha.',
     [
-      'otel_logs + otel_traces',
-      'TimeSeries / remote write',
-      'Retenção de telemetria: 72 h',
+      'Logs, traces e métricas',
+      'Memória, CPU e armazenamento',
+      'Um motor para os três sinais',
     ],
   ),
   node(
@@ -399,20 +428,16 @@ export const INFRA_NODES: InfraNode[] = [
     'G',
     'green',
     'Exploração de sinais',
-    'O Grafana usa o plugin ClickHouse para explorar logs e traces por SQL e uma fonte Prometheus para consultar métricas na API do ClickHouse. Os logs das APIs carregam trace_id para correlação com os traces.',
+    'O Grafana reúne os dashboards e a exploração dos sinais armazenados no ClickHouse. Logs e traces se conectam pelo contexto das requisições para acompanhar cada chamada das APIs.',
     [
-      'SQL: logs e traces',
-      'PromQL: métricas',
-      'Correlação de logs por trace_id',
+      'Dashboards das aplicações',
+      'Sinais da infraestrutura',
+      'Logs e traces correlacionados',
     ],
   ),
 ]
 
-const p = (id: string, col: number, row: number) => ({
-  id,
-  x: col * 250,
-  y: row * 190 + 38,
-})
+const p = (id: string, x: number, y: number) => ({ id, x, y })
 const e = (
   from: string,
   to: string,
@@ -420,416 +445,194 @@ const e = (
   label?: string,
   extra: Partial<DiagramEdge> = {},
 ): DiagramEdge => ({ from, to, tone, label, ...extra })
-const lane = (label: string, row: number, width = 1200) => ({
-  label,
-  y: row * 190,
-  width,
-})
 
 export const INFRA_FLOWS: DiagramFlow[] = [
   {
     id: 'overview',
     label: 'Panorama',
     number: '01',
-    title: 'Uma visão de ponta a ponta.',
+    title: 'Os caminhos principais.',
     description:
-      'Da imagem publicada à requisição atendida, com dados e telemetria no mesmo mapa.',
-    lanes: [
-      lane('ENTREGA CONTÍNUA', 0),
-      lane('CAMINHO DA REQUISIÇÃO', 1),
-      lane('PLATAFORMA, DADOS E OBSERVABILIDADE', 2),
-    ],
+      'Acesso, entrega e observabilidade. Os detalhes ficam em cada componente.',
     nodes: [
-      p('github', 0, 0),
-      p('registry', 1, 0),
-      p('updater', 2, 0),
-      p('gitops', 3, 0),
-      p('argo', 4, 0),
-      p('visitors', 0, 1),
-      p('cloudflare', 1, 1),
-      p('nlb', 2, 1),
-      p('gateway', 3, 1),
-      p('apps', 4, 1),
-      p('terraform', 0, 2),
-      p('grafana', 1, 2),
-      p('clickhouse', 2, 2),
-      p('collector', 3, 2),
-      p('postgres', 4, 2),
+      p('cloudflare', 0, 230),
+      p('gateway', 320, 260),
+      p('apps', 660, 240),
+      p('postgres', 990, 100),
+      p('gitops', 320, 20),
+      p('argo', 660, 0),
+      p('collector', 660, 470),
+      p('clickhouse', 320, 510),
+      p('grafana', 0, 480),
     ],
     edges: [
-      e('github', 'registry', 'purple'),
-      e('registry', 'updater', 'purple'),
-      e('updater', 'gitops', 'purple'),
-      e('gitops', 'argo', 'purple'),
-      e('argo', 'apps', 'purple', 'rollout', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('visitors', 'cloudflare', 'cyan'),
-      e('cloudflare', 'nlb', 'cyan'),
-      e('nlb', 'gateway', 'cyan'),
+      e('cloudflare', 'gateway', 'cyan', 'via OCI NLB'),
       e('gateway', 'apps', 'cyan'),
-      e('apps', 'postgres', 'amber', 'SQL', {
+      e('gitops', 'argo', 'purple'),
+      e('argo', 'apps', 'purple', 'reconcilia', {
         source: 'bottom',
         target: 'top',
       }),
+      e('apps', 'postgres', 'amber', 'SQL'),
       e('apps', 'collector', 'green', 'OTLP', {
         source: 'bottom',
         target: 'top',
-        vertices: [
-          { x: 1100, y: 360 },
-          { x: 850, y: 360 },
-        ],
       }),
-      e('collector', 'clickhouse', 'green', 'export', {
+      e('collector', 'clickhouse', 'green', undefined, {
         source: 'left',
         target: 'right',
       }),
-      e('clickhouse', 'grafana', 'green', 'consultas', {
+      e('clickhouse', 'grafana', 'green', undefined, {
         source: 'left',
         target: 'right',
       }),
-      e('terraform', 'nlb', 'purple', 'provisiona', {
-        dashed: true,
-        source: 'top',
-        target: 'bottom',
-        vertices: [
-          { x: 100, y: 365 },
-          { x: 600, y: 365 },
-        ],
-      }),
-    ],
-    steps: [
-      {
-        title: 'Código vira versão',
-        text: 'O CI publica a imagem; o Image Updater registra a tag no Git e o Argo CD reconcilia o cluster.',
-      },
-      {
-        title: 'Acesso chega ao produto',
-        text: 'Cloudflare, Oracle NLB e Gateway API encaminham cada domínio e caminho à aplicação.',
-      },
-      {
-        title: 'Cada chamada deixa contexto',
-        text: 'As APIs usam PostgreSQL e enviam logs, traces e métricas para o pipeline OpenTelemetry.',
-      },
     ],
   },
   {
     id: 'traffic',
     label: 'Requisições',
     number: '02',
-    title: 'Do navegador até o banco.',
+    title: 'Da borda às aplicações.',
     description:
-      'Frontends, APIs, autenticação e persistência, com os caminhos de cada integração.',
-    lanes: [
-      lane('BORDA E ROTEAMENTO', 0),
-      lane('APLICAÇÕES', 1),
-      lane('DADOS E INTEGRAÇÕES', 2),
-    ],
+      'Tráfego público em azul. O Service do NGINX solicita o NLB ao Cloud Controller.',
     nodes: [
-      p('visitors', 0, 0),
-      p('cloudflare', 1, 0),
-      p('nlb', 2, 0),
-      p('gateway', 3, 0),
-      p('tls', 4, 0),
-      p('frontends', 0, 1),
-      p('go', 3, 1),
-      p('node', 4, 1),
-      p('oauth', 3, 2),
-      p('postgres', 4, 2),
+      p('cloudflare', 0, 260),
+      p('nlb', 280, 260),
+      p('gateway', 560, 260),
+      p('frontends', 880, 20),
+      p('go', 880, 260),
+      p('node', 880, 500),
+      p('postgres', 1190, 380),
+      p('lbservice', 560, 20),
+      p('ccm', 280, 20),
     ],
     edges: [
-      e('visitors', 'cloudflare', 'cyan'),
       e('cloudflare', 'nlb', 'cyan'),
       e('nlb', 'gateway', 'cyan'),
-      e('tls', 'gateway', 'cyan', 'TLS / DNS', {
-        dashed: true,
-        source: 'left',
-        target: 'right',
-      }),
-      e('gateway', 'frontends', 'cyan', '/', {
-        source: 'bottom',
-        target: 'top',
-        vertices: [
-          { x: 850, y: 180 },
-          { x: 100, y: 180 },
-        ],
-      }),
-      e('gateway', 'go', 'cyan', '/api/', { source: 'bottom', target: 'top' }),
+      e('gateway', 'frontends', 'cyan', '/'),
+      e('gateway', 'go', 'cyan', '/api/'),
       e('gateway', 'node', 'cyan', '/api/', {
         source: 'bottom',
-        target: 'top',
-        vertices: [
-          { x: 960, y: 180 },
-          { x: 1100, y: 180 },
-        ],
-      }),
-      e('go', 'oauth', 'amber', 'OAuth / Spotify', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('node', 'oauth', 'amber', 'Google OAuth', {
-        dashed: true,
-        source: 'bottom',
-        target: 'right',
-      }),
-      e('go', 'postgres', 'amber', 'MusicHub', {
-        source: 'bottom',
         target: 'left',
-        vertices: [
-          { x: 850, y: 355 },
-          { x: 970, y: 355 },
-          { x: 970, y: 466 },
-        ],
       }),
-      e('node', 'postgres', 'amber', 'LiveLink', {
+      e('go', 'postgres', 'amber', undefined, { targetOffset: -18 }),
+      e('node', 'postgres', 'amber', undefined, { targetOffset: 18 }),
+      e('gateway', 'lbservice', 'purple', undefined, {
+        source: 'top',
+        target: 'bottom',
+        dashed: true,
+      }),
+      e('lbservice', 'ccm', 'purple', undefined, {
+        source: 'left',
+        target: 'right',
+        dashed: true,
+      }),
+      e('ccm', 'nlb', 'purple', 'provisiona', {
         source: 'bottom',
         target: 'top',
+        dashed: true,
       }),
-    ],
-    steps: [
-      {
-        title: 'Roteamento por produto',
-        text: 'Portfolio, MusicHub e LiveLink têm seus próprios domínios. HTTPRoutes separam os arquivos estáticos das APIs.',
-      },
-      {
-        title: 'Integrações das APIs',
-        text: 'Go atende o MusicHub e integra Spotify. Node.js atende o LiveLink, com Express e Prisma.',
-      },
-      {
-        title: 'Persistência por produto',
-        text: 'As APIs usam schemas separados no PostgreSQL. CloudNativePG gerencia o banco e Longhorn fornece o armazenamento persistente.',
-      },
     ],
   },
   {
     id: 'delivery',
     label: 'Deploy',
     number: '03',
-    title: 'O Git descreve o que está rodando.',
+    title: 'Do commit à produção.',
     description:
-      'Provisionamento, integração contínua e reconciliação têm responsabilidades próprias.',
-    lanes: [
-      lane('DA APLICAÇÃO AO ESTADO DESEJADO', 0),
-      lane('DA INFRAESTRUTURA AO CLUSTER', 1),
-      lane('EXECUÇÃO', 2),
-    ],
+      'Uma versão percorre o pipeline até ser reconciliada pelo Argo CD.',
     nodes: [
-      p('github', 0, 0),
-      p('registry', 1, 0),
-      p('updater', 2, 0),
-      p('gitops', 3, 0),
-      p('argo', 4, 0),
-      p('terraform', 0, 1),
-      p('oci', 1, 1),
-      p('k3s', 2, 1),
-      p('secrets', 0, 2),
-      p('longhorn', 2, 2),
-      p('apps', 4, 2),
+      p('github', 0, 160),
+      p('registry', 330, 0),
+      p('updater', 680, 60),
+      p('gitops', 1010, 240),
+      p('argo', 680, 470),
+      p('apps', 320, 430),
     ],
     edges: [
       e('github', 'registry', 'purple', 'build'),
-      e('registry', 'updater', 'purple', 'nova tag'),
+      e('registry', 'updater', 'purple', 'nova imagem'),
       e('updater', 'gitops', 'purple', 'commit'),
-      e('gitops', 'argo', 'purple', 'sync'),
-      e('terraform', 'oci', 'purple'),
-      e('oci', 'k3s', 'purple', 'bootstrap'),
-      e('argo', 'apps', 'purple', 'rollout', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('argo', 'k3s', 'purple', 'plataforma', {
+      e('gitops', 'argo', 'purple', 'sync', {
         source: 'bottom',
         target: 'right',
-        vertices: [
-          { x: 1100, y: 185 },
-          { x: 730, y: 185 },
-          { x: 730, y: 270 },
-        ],
       }),
-      e('k3s', 'longhorn', 'amber', 'CSI', { source: 'bottom', target: 'top' }),
-      e('secrets', 'apps', 'purple', 'Kubernetes Secrets', {
-        dashed: true,
-        vertices: [
-          { x: 220, y: 545 },
-          { x: 975, y: 545 },
-        ],
+      e('argo', 'apps', 'purple', 'rollout', {
+        source: 'left',
+        target: 'right',
       }),
-    ],
-    steps: [
-      {
-        title: 'Validar e empacotar',
-        text: 'GitHub Actions executa os checks das aplicações e publica imagens compatíveis com amd64 e arm64.',
-      },
-      {
-        title: 'Versionar e reconciliar',
-        text: 'Image Updater grava a tag no oracle-gitops. O Argo CD aplica o estado desejado via charts e manifests.',
-      },
-      {
-        title: 'Separar base e workloads',
-        text: 'Terraform cuida de rede, compute e bootstrap. Argo CD gerencia as aplicações e a plataforma Kubernetes.',
-      },
     ],
   },
   {
     id: 'telemetry',
     label: 'Observabilidade',
     number: '04',
-    title: 'Três sinais. Um contexto.',
+    title: 'Três sinais, um destino.',
     description:
-      'As aplicações emitem telemetria; o Kubernetes fornece a identidade; o ClickHouse centraliza os dados.',
-    lanes: [
-      lane('ORIGEM DOS SINAIS', 0),
-      lane('COLETA, CONTEXTO E PROCESSAMENTO', 1),
-      lane('ARMAZENAMENTO E EXPLORAÇÃO', 2),
-    ],
+      'O Collector reúne os sinais e o contexto. ClickHouse centraliza; Grafana explora.',
     nodes: [
       p('go', 0, 0),
-      p('node', 1, 0),
-      p('infra', 3, 0),
-      p('metadata', 0, 1),
-      p('collector', 2, 1),
-      p('clickhouse', 2, 2),
-      p('keeper', 0, 2),
-      p('grafana', 4, 2),
+      p('node', 0, 180),
+      p('infra', 0, 400),
+      p('metadata', 380, 480),
+      p('collector', 380, 190),
+      p('clickhouse', 750, 190),
+      p('grafana', 1100, 190),
+      p('keeper', 750, 450),
     ],
     edges: [
-      e('go', 'collector', 'green', 'OTLP: logs, traces, métricas', {
-        source: 'bottom',
-        target: 'top',
-        vertices: [
-          { x: 100, y: 170 },
-          { x: 600, y: 170 },
-        ],
+      e('go', 'collector', 'green', undefined, { targetOffset: -23 }),
+      e('node', 'collector', 'green', 'OTLP'),
+      e('infra', 'collector', 'green', 'coleta', { targetOffset: 23 }),
+      e('metadata', 'collector', 'green', 'contexto', {
+        source: 'top',
+        target: 'bottom',
+        dashed: true,
       }),
-      e('node', 'collector', 'green', 'OTLP', {
-        source: 'bottom',
-        target: 'top',
-        vertices: [
-          { x: 350, y: 190 },
-          { x: 600, y: 190 },
-        ],
+      e('collector', 'clickhouse', 'green', '3 sinais'),
+      e('clickhouse', 'grafana', 'green', 'consultas'),
+      e('keeper', 'clickhouse', 'green', 'coordenação', {
+        source: 'top',
+        target: 'bottom',
+        dashed: true,
       }),
-      e('infra', 'collector', 'green', 'receivers / scrape', {
-        source: 'bottom',
-        target: 'right',
-      }),
-      e('metadata', 'collector', 'green', 'k8sattributes', { dashed: true }),
-      e('collector', 'clickhouse', 'green', 'logs + traces / exporter nativo', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('collector', 'clickhouse', 'green', 'métricas / remote write', {
-        source: 'right',
-        target: 'right',
-        vertices: [
-          { x: 850, y: 276 },
-          { x: 850, y: 466 },
-        ],
-      }),
-      e('keeper', 'clickhouse', 'green', 'coordenação', { dashed: true }),
-      e('clickhouse', 'grafana', 'green', 'SQL + PromQL'),
-    ],
-    steps: [
-      {
-        title: 'Instrumentação nas duas APIs',
-        text: 'Spans HTTP e SQL formam os traces. Logs carregam trace_id; métricas descrevem o comportamento das aplicações.',
-      },
-      {
-        title: 'Identidade vem do cluster',
-        text: 'O Collector associa o pod e adiciona serviço, namespace, imagem e nó. As APIs não precisam repetir esses metadados.',
-      },
-      {
-        title: 'Exploração no Grafana',
-        text: 'Logs e traces usam SQL; métricas usam PromQL na API do ClickHouse. A correlação entre logs e traces usa o trace_id.',
-      },
     ],
   },
   {
     id: 'platform',
     label: 'Plataforma',
     number: '05',
-    title: 'Uma base automatizada e reproduzível.',
+    title: 'A base que sustenta os produtos.',
     description:
-      'Rede privada, acesso administrativo, persistência e os operadores que sustentam os produtos.',
-    lanes: [
-      lane('PROVISIONAMENTO E ACESSO', 0),
-      lane('SERVIÇOS DA PLATAFORMA', 1),
-      lane('WORKLOADS E PERSISTÊNCIA', 2),
-    ],
+      'Provisionamento, acesso privado e persistência ao redor do K3s.',
     nodes: [
-      p('terraform', 0, 0),
-      p('oci', 1, 0),
-      p('k3s', 2, 0),
-      p('warp', 4, 0),
-      p('argo', 0, 1),
-      p('secrets', 1, 1),
-      p('longhorn', 2, 1),
-      p('tls', 3, 1),
-      p('gateway', 4, 1),
-      p('postgres', 1, 2),
-      p('clickhouse', 2, 2),
-      p('grafana', 3, 2),
-      p('apps', 4, 2),
+      p('terraform', 0, 70),
+      p('oci', 320, 0),
+      p('k3s', 660, 240),
+      p('warp', 660, 0),
+      p('secrets', 0, 280),
+      p('tls', 320, 480),
+      p('longhorn', 660, 480),
+      p('clickhouse', 990, 350),
+      p('postgres', 990, 560),
     ],
     edges: [
       e('terraform', 'oci', 'purple'),
-      e('oci', 'k3s', 'purple'),
-      e('warp', 'k3s', 'purple', 'túnel privado', {
+      e('oci', 'k3s', 'purple', 'bootstrap', { targetOffset: -23 }),
+      e('warp', 'k3s', 'purple', 'acesso privado', {
+        source: 'bottom',
+        target: 'top',
         dashed: true,
-        source: 'left',
-        target: 'right',
       }),
-      e('argo', 'k3s', 'purple', 'reconcilia', {
-        source: 'top',
-        target: 'bottom',
-        vertices: [
-          { x: 100, y: 180 },
-          { x: 600, y: 180 },
-        ],
+      e('secrets', 'k3s', 'purple', 'Secrets', { dashed: true }),
+      e('tls', 'k3s', 'cyan', 'TLS + DNS', {
+        target: 'left',
+        targetOffset: 23,
+        dashed: true,
       }),
       e('k3s', 'longhorn', 'amber', 'CSI', { source: 'bottom', target: 'top' }),
-      e('tls', 'gateway', 'cyan', 'certificados'),
-      e('gateway', 'apps', 'cyan', 'HTTPRoutes', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('secrets', 'apps', 'purple', 'configuração', {
-        dashed: true,
-        source: 'bottom',
-        target: 'left',
-        vertices: [
-          { x: 350, y: 360 },
-          { x: 970, y: 360 },
-          { x: 970, y: 460 },
-        ],
-      }),
-      e('longhorn', 'postgres', 'amber', 'volume', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('longhorn', 'clickhouse', 'amber', 'volume', {
-        source: 'bottom',
-        target: 'top',
-      }),
-      e('longhorn', 'grafana', 'amber', 'volume', {
-        source: 'bottom',
-        target: 'top',
-      }),
-    ],
-    steps: [
-      {
-        title: 'Entrada pública, nó privado',
-        text: 'A borda pública passa por Cloudflare e OCI NLB. WARP e Tunnel oferecem o caminho administrativo para a rede privada.',
-      },
-      {
-        title: 'Operadores cuidam dos serviços',
-        text: 'CloudNativePG e ClickHouse Operator gerenciam os bancos. cert-manager e external-dns automatizam certificados e DNS.',
-      },
-      {
-        title: 'Plataforma integrada',
-        text: 'K3s orquestra os workloads em ARM64 na Oracle Cloud. Longhorn fornece persistência e os HPAs acompanham as métricas das aplicações.',
-      },
+      e('longhorn', 'clickhouse', 'amber'),
+      e('longhorn', 'postgres', 'amber'),
     ],
   },
 ]
@@ -924,7 +727,6 @@ export const STACK_GROUPS = [
       'kube-state-metrics',
       'Prometheus scrape',
       'Filelog',
-      'Prometheus remote write',
     ],
   },
   {
@@ -935,11 +737,8 @@ export const STACK_GROUPS = [
       'ClickHouse',
       'ClickHouse Operator',
       'ClickHouse Keeper',
-      'TimeSeries',
       'Grafana',
       'ClickHouse datasource',
-      'SQL',
-      'PromQL',
       'Logs ↔ traces / trace_id',
     ],
   },

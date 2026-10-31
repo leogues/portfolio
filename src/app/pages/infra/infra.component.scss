@@ -497,31 +497,6 @@ h2 {
   border-radius: 50%;
   background: var(--tone);
 }
-.flow-steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
-  padding: 2.2rem 0.3rem 0;
-}
-.step-number {
-  font-size: 0.65rem;
-  color: #b89aff;
-}
-.step-number span {
-  color: #b89aff40;
-  margin-left: 0.5rem;
-}
-.flow-steps h3 {
-  font-size: 0.83rem;
-  font-weight: 500;
-  margin-top: 0.9rem;
-}
-.flow-steps p {
-  color: var(--muted);
-  font-size: 0.7rem;
-  line-height: 1.9;
-  margin-top: 0.6rem;
-}
 .stack-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -567,39 +542,6 @@ h2 {
   padding: 0.35rem 0.55rem;
   border-radius: 0.35rem;
   line-height: 1.6;
-}
-.decisions-section {
-  margin: 5.5rem 0;
-  padding: 3rem;
-  border: 1px solid #b89aff20;
-  border-radius: 1rem;
-  background: radial-gradient(ellipse at top left, #682abf1a, transparent 70%);
-}
-.decisions-section h2 {
-  font-size: 2rem;
-}
-.decisions-section h2 > span {
-  color: #b89aff;
-}
-.decision-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
-  margin-top: 2rem;
-}
-.decision-symbol {
-  color: #b89aff;
-  font-size: 1.4rem;
-}
-.decision-grid h3 {
-  font-size: 0.83rem;
-  font-weight: 500;
-  margin: 0.7rem 0;
-}
-.decision-grid p {
-  font-size: 0.7rem;
-  line-height: 1.9;
-  color: var(--muted);
 }
 .infra-footer {
   display: flex;
@@ -849,17 +791,6 @@ h2 {
   .detail-category {
     font-size: 0.58rem;
   }
-  .flow-steps {
-    grid-template-columns: 1fr;
-    gap: 1.6rem;
-    padding-top: 1.7rem;
-  }
-  .flow-steps h3 {
-    margin-top: 0.5rem;
-  }
-  .flow-steps p {
-    font-size: 0.68rem;
-  }
   .stack-grid {
     grid-template-columns: 1fr;
     gap: 0.8rem;
@@ -872,21 +803,6 @@ h2 {
   }
   .stack-tags > span {
     font-size: 0.6rem;
-  }
-  .decisions-section {
-    padding: 1.6rem;
-    margin-block: 3.5rem;
-  }
-  .decisions-section h2 {
-    font-size: 1.65rem;
-  }
-  .decision-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-  }
-  .decision-grid h3 {
-    margin-block: 0.4rem;
   }
   .infra-footer {
     flex-wrap: wrap;
@@ -901,5 +817,122 @@ h2 {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
+  }
+}
+
+.hero-connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.badge-clickhouse {
+  right: 0;
+  bottom: 27px;
+  transform: rotate(5deg);
+  border-color: #79d6b54a;
+}
+.badge-clickhouse > span {
+  color: #79d6b5;
+}
+.clickhouse-note {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #79d6b522;
+  border-radius: 1rem;
+  background: linear-gradient(110deg, #79d6b508, #79d6b502);
+}
+.note-mark {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #79d6b510;
+  color: #79d6b5;
+  font-size: 0.9rem;
+}
+.clickhouse-note .eyebrow {
+  color: #79d6b5;
+  font-size: 0.55rem;
+}
+.clickhouse-note h3 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-block: 0.4rem;
+}
+.clickhouse-note p {
+  max-width: 660px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.8;
+}
+.note-caption {
+  white-space: nowrap;
+  margin-left: auto;
+  font-size: 0.62rem;
+  color: #79d6b5;
+}
+@media (max-width: 700px) {
+  .clickhouse-note {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 1.2rem;
+    gap: 0.8rem;
+  }
+  .clickhouse-note > div {
+    flex: 1;
+    min-width: 180px;
+  }
+  .note-caption {
+    margin-left: 0;
+    padding-left: 3.8rem;
+  }
+  .badge-clickhouse {
+    right: -5px;
+    bottom: 8px;
+  }
+}
+
+.component-list {
+  border-bottom: 1px solid #ffffff0b;
+}
+.component-list > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.7rem;
+  color: #c2aed4;
+  font-size: 0.65rem;
+  cursor: pointer;
+  list-style: none;
+}
+.component-list > summary::-webkit-details-marker {
+  display: none;
+}
+.component-list > summary > span {
+  color: #9781ab;
+  font-size: 0.55rem;
+}
+.component-list > summary > i {
+  margin-left: auto;
+  font-style: normal;
+  transition: transform 0.15s;
+}
+.component-list[open] > summary > i {
+  transform: rotate(180deg);
+}
+.component-list .component-picker {
+  padding-top: 0;
+  border-bottom: 0;
+}
+@media (max-width: 700px) {
+  .component-list > summary {
+    padding: 1rem;
   }
 }

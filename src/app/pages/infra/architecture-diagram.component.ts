@@ -8,17 +8,32 @@ import {
   OnChanges,
   OnDestroy,
   Output,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core'
 import type { Graph } from '@antv/x6'
-import { DiagramFlow, INFRA_NODES, Tone } from './infra.data'
+import { DiagramEdge, DiagramFlow, INFRA_NODES, Tone } from './infra.data'
 
+type Side = NonNullable<DiagramEdge['source']>
 const COLORS: Record<Tone, string> = {
   purple: '#b89aff',
   cyan: '#76cfe8',
   green: '#79d6b5',
   amber: '#edc488',
+}
+const DIRECTIONS: Record<Side, { x: number; y: number }> = {
+  top: { x: 0, y: -1 },
+  bottom: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+}
+
+function anchor(side: Side, offset = 0) {
+  return {
+    name: side,
+    args: side === 'top' || side === 'bottom' ? { dx: offset } : { dy: offset },
+  }
 }
 
 @Component({
@@ -37,7 +52,7 @@ export class ArchitectureDiagramComponent
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLDivElement>
   @ViewChild('stage', { static: true }) stage!: ElementRef<HTMLDivElement>
   @ViewChild('frame', { static: true }) frame!: ElementRef<HTMLDivElement>
-  graph?: Graph
+  private graph?: Graph
   zoom = 100
   loading = true
   failed = false
@@ -51,6 +66,24 @@ export class ArchitectureDiagramComponent
     try {
       const { Graph } = await import('@antv/x6')
       if (this.destroyed) return
+      Graph.registerConnector(
+        'portfolio-curve',
+        (
+          start,
+          end,
+          _route,
+          options: { raw?: boolean; sourceSide?: Side; targetSide?: Side },
+        ) => {
+          const source = DIRECTIONS[options.sourceSide || 'right']
+          const target = DIRECTIONS[options.targetSide || 'left']
+          const distance = Math.min(
+            160,
+            Math.max(45, Math.hypot(end.x - start.x, end.y - start.y) * 0.45),
+          )
+          return `M ${start.x} ${start.y} C ${start.x + source.x * distance} ${start.y + source.y * distance}, ${end.x + target.x * distance} ${end.y + target.y * distance}, ${end.x} ${end.y}`
+        },
+        true,
+      )
       this.zone.runOutsideAngular(() => {
         this.graph = new Graph({
           container: this.canvas.nativeElement,
@@ -64,18 +97,20 @@ export class ArchitectureDiagramComponent
           mousewheel: {
             enabled: true,
             modifiers: 'ctrl|meta',
-            minScale: 0.25,
+            minScale: 0.2,
             maxScale: 1.8,
             zoomAtMousePosition: true,
           },
-          scaling: { min: 0.25, max: 1.8 },
+          scaling: { min: 0.2, max: 1.8 },
+          connecting: {
+            connectionPoint: { name: 'boundary', args: { offset: 6 } },
+          },
           interacting: false,
           async: false,
         })
-        this.graph.on('node:click', ({ node }) => {
-          if (INFRA_NODES.some((item) => item.id === node.id))
-            this.zone.run(() => this.selected.emit(node.id))
-        })
+        this.graph.on('node:click', ({ node }) =>
+          this.zone.run(() => this.selected.emit(node.id)),
+        )
         this.graph.on('scale', ({ sx }) =>
           this.zone.run(() => {
             this.zoom = Math.round(sx * 100)
@@ -98,21 +133,11 @@ export class ArchitectureDiagramComponent
     }
   }
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     if (!this.graph) return
     this.zone.runOutsideAngular(() => {
-      if (
-        this.graph?.getCellById(this.flow.nodes[0].id) &&
-        this.graph
-          .getNodes()
-          .filter((item) => item.getData()?.['component'])
-          .map((item) => item.id)
-          .join() === this.flow.nodes.map((item) => item.id).join()
-      ) {
-        this.updateSelection()
-      } else {
-        this.render()
-      }
+      if (changes['flow']) this.render()
+      else this.updateSelection()
     })
   }
 
@@ -120,44 +145,6 @@ export class ArchitectureDiagramComponent
     const graph = this.graph
     if (!graph) return
     graph.clearCells()
-    this.flow.lanes.forEach((lane, index) =>
-      graph.addNode({
-        id: `lane-${index}`,
-        x: -20,
-        y: lane.y - 4,
-        width: lane.width + 40,
-        height: 162,
-        zIndex: 0,
-        markup: [
-          { tagName: 'rect', selector: 'body' },
-          { tagName: 'text', selector: 'label' },
-        ],
-        attrs: {
-          body: {
-            width: '100%',
-            height: '100%',
-            rx: 16,
-            fill: '#21192f',
-            fillOpacity: 0.55,
-            stroke: '#382c48',
-            strokeOpacity: 0.6,
-          },
-          label: {
-            text: lane.label,
-            x: 20,
-            y: 21,
-            fontSize: 10,
-            fontWeight: 500,
-            fontFamily: 'Poppins, sans-serif',
-            refX: 0,
-            refY: 0,
-            letterSpacing: 1.9,
-            fill: '#9a8caa',
-            textAnchor: 'start',
-          },
-        },
-      }),
-    )
     this.flow.nodes.forEach((position) => {
       const item = INFRA_NODES.find((node) => node.id === position.id)!
       const color = COLORS[item.tone]
@@ -165,15 +152,13 @@ export class ArchitectureDiagramComponent
         id: item.id,
         x: position.x,
         y: position.y,
-        width: 200,
-        height: 96,
+        width: 224,
+        height: 88,
         zIndex: 2,
-        data: { component: true },
         markup: [
           { tagName: 'rect', selector: 'body' },
           { tagName: 'rect', selector: 'iconBg' },
           { tagName: 'text', selector: 'icon' },
-          { tagName: 'circle', selector: 'dot' },
           { tagName: 'text', selector: 'title' },
           { tagName: 'text', selector: 'subtitle' },
         ],
@@ -181,9 +166,9 @@ export class ArchitectureDiagramComponent
           body: {
             width: '100%',
             height: '100%',
-            rx: 12,
-            fill: '#292036',
-            stroke: '#4a3a5d',
+            rx: 16,
+            fill: '#261e34',
+            stroke: '#534260',
             strokeWidth: 1,
             cursor: 'pointer',
             tabindex: 0,
@@ -192,22 +177,22 @@ export class ArchitectureDiagramComponent
             'data-node': item.id,
           },
           iconBg: {
-            x: 13,
-            y: 12,
-            width: 32,
-            height: 28,
-            rx: 8,
+            x: 14,
+            y: 23,
+            width: 36,
+            height: 40,
+            rx: 11,
             stroke: 'none',
             fill: color,
-            fillOpacity: 0.11,
+            fillOpacity: 0.09,
             pointerEvents: 'none',
           },
           icon: {
             text: item.mark,
-            x: 29,
-            y: 26,
+            x: 32,
+            y: 43,
             fontSize: 12,
-            fontWeight: 600,
+            fontWeight: 500,
             fontFamily: 'Poppins, sans-serif',
             refX: 0,
             refY: 0,
@@ -215,18 +200,10 @@ export class ArchitectureDiagramComponent
             fill: color,
             pointerEvents: 'none',
           },
-          dot: {
-            cx: 182,
-            cy: 26,
-            r: 3,
-            fill: color,
-            opacity: 0.7,
-            pointerEvents: 'none',
-          },
           title: {
             text: item.name,
-            x: 13,
-            y: 61,
+            x: 64,
+            y: 32,
             fontSize: 13,
             fontWeight: 500,
             fontFamily: 'Poppins, sans-serif',
@@ -238,14 +215,14 @@ export class ArchitectureDiagramComponent
           },
           subtitle: {
             text: item.subtitle,
-            x: 13,
-            y: 80,
-            fontSize: 9,
+            x: 64,
+            y: 54,
+            fontSize: 10,
             fontFamily: 'Poppins, sans-serif',
             refX: 0,
             refY: 0,
             textAnchor: 'start',
-            fill: '#b6a6c5',
+            fill: '#bbaacb',
             pointerEvents: 'none',
           },
         },
@@ -255,38 +232,49 @@ export class ArchitectureDiagramComponent
       graph.addEdge({
         id: `edge-${index}`,
         zIndex: 1,
-        source: { cell: edge.from, anchor: { name: edge.source || 'right' } },
-        target: { cell: edge.to, anchor: { name: edge.target || 'left' } },
-        vertices: edge.vertices,
-        router: edge.vertices
-          ? undefined
-          : { name: 'orth', args: { padding: 20 } },
-        connector: { name: 'rounded', args: { radius: 12 } },
+        source: {
+          cell: edge.from,
+          anchor: anchor(edge.source || 'right', edge.sourceOffset),
+        },
+        target: {
+          cell: edge.to,
+          anchor: anchor(edge.target || 'left', edge.targetOffset),
+        },
+        connector: {
+          name: 'portfolio-curve',
+          args: {
+            sourceSide: edge.source || 'right',
+            targetSide: edge.target || 'left',
+          },
+        },
         attrs: {
           line: {
             stroke: COLORS[edge.tone],
-            strokeWidth: 1.4,
-            strokeOpacity: 0.65,
-            strokeDasharray: edge.dashed ? '5 5' : '',
-            targetMarker: { name: 'block', width: 6, height: 5 },
+            strokeWidth: 1.7,
+            strokeOpacity: 0.7,
+            strokeDasharray: edge.dashed ? '4 6' : '',
+            targetMarker: { name: 'block', width: 7, height: 6 },
           },
         },
         labels: edge.label
           ? [
               {
-                position: 0.5,
+                position: {
+                  distance: edge.labelPosition ?? 0.5,
+                  offset: edge.labelOffset ?? -16,
+                },
                 attrs: {
                   label: {
                     text: edge.label,
                     fontFamily: 'Poppins, sans-serif',
-                    fontSize: 9,
+                    fontSize: 10,
                     fill: COLORS[edge.tone],
                   },
                   body: {
                     fill: '#1b1428',
                     stroke: '#1b1428',
-                    strokeWidth: 5,
-                    rx: 3,
+                    strokeWidth: 6,
+                    rx: 4,
                   },
                 },
               },
@@ -300,12 +288,11 @@ export class ArchitectureDiagramComponent
 
   private updateSelection(): void {
     this.graph?.getNodes().forEach((node) => {
-      if (!node.getData()?.['component']) return
       const item = INFRA_NODES.find((item) => item.id === node.id)!
       const active = node.id === this.selectedId
-      node.attr('body/stroke', active ? COLORS[item.tone] : '#4a3a5d')
-      node.attr('body/strokeWidth', active ? 2 : 1)
-      node.attr('body/fill', active ? '#342747' : '#292036')
+      node.attr('body/stroke', active ? COLORS[item.tone] : '#534260')
+      node.attr('body/strokeWidth', active ? 1.8 : 1)
+      node.attr('body/fill', active ? '#32253f' : '#261e34')
       node.attr('body/aria-pressed', String(active))
     })
   }
@@ -326,13 +313,13 @@ export class ArchitectureDiagramComponent
 
   fit(): void {
     this.graph?.zoomToFit({
-      padding: this.stage.nativeElement.clientWidth < 600 ? 16 : 32,
+      padding: this.stage.nativeElement.clientWidth < 600 ? 20 : 50,
       maxScale: 1,
     })
   }
 
   changeZoom(direction: number): void {
-    this.graph?.zoom(direction * 0.15, { minScale: 0.25, maxScale: 1.8 })
+    this.graph?.zoom(direction * 0.15, { minScale: 0.2, maxScale: 1.8 })
   }
 
   async toggleFullscreen(): Promise<void> {
@@ -340,7 +327,7 @@ export class ArchitectureDiagramComponent
       if (document.fullscreenElement) await document.exitFullscreen()
       else await this.frame.nativeElement.requestFullscreen()
     } catch {
-      /* The diagram remains usable when fullscreen is unavailable. */
+      /* Fullscreen availability depends on the browser. */
     }
   }
 
