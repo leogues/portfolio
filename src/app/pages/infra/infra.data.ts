@@ -39,6 +39,7 @@ export interface DiagramFlow {
   description: string
   nodes: { id: string; x: number; y: number }[]
   edges: DiagramEdge[]
+  lanes: { label: string; y: number; height?: number }[]
 }
 
 function node(
@@ -438,6 +439,11 @@ export const INFRA_NODES: InfraNode[] = [
 ]
 
 const p = (id: string, x: number, y: number) => ({ id, x, y })
+const lane = (label: string, row: number, height = 190) => ({
+  label,
+  y: row * 230,
+  height,
+})
 const e = (
   from: string,
   to: string,
@@ -454,26 +460,31 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     title: 'Os caminhos principais.',
     description:
       'Acesso, entrega e observabilidade. Os detalhes ficam em cada componente.',
+    lanes: [
+      lane('ENTREGA CONTÍNUA', 0),
+      lane('ACESSO ÀS APLICAÇÕES', 1),
+      lane('DADOS E OBSERVABILIDADE', 2),
+    ],
     nodes: [
-      p('cloudflare', 0, 230),
-      p('gateway', 320, 260),
-      p('apps', 660, 240),
-      p('postgres', 990, 100),
-      p('gitops', 320, 20),
-      p('argo', 660, 0),
-      p('collector', 660, 470),
-      p('clickhouse', 320, 510),
-      p('grafana', 0, 480),
+      p('gitops', 340, 50),
+      p('argo', 680, 50),
+      p('cloudflare', 0, 280),
+      p('gateway', 340, 280),
+      p('apps', 680, 280),
+      p('grafana', 0, 510),
+      p('clickhouse', 340, 510),
+      p('collector', 680, 510),
+      p('postgres', 1020, 510),
     ],
     edges: [
-      e('cloudflare', 'gateway', 'cyan', 'via OCI NLB'),
+      e('cloudflare', 'gateway', 'cyan', 'via NLB'),
       e('gateway', 'apps', 'cyan'),
       e('gitops', 'argo', 'purple'),
       e('argo', 'apps', 'purple', 'reconcilia', {
         source: 'bottom',
         target: 'top',
       }),
-      e('apps', 'postgres', 'amber', 'SQL'),
+      e('apps', 'postgres', 'amber', 'SQL', { target: 'top' }),
       e('apps', 'collector', 'green', 'OTLP', {
         source: 'bottom',
         target: 'top',
@@ -495,28 +506,47 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     title: 'Da borda às aplicações.',
     description:
       'Tráfego público em azul. O Service do NGINX solicita o NLB ao Cloud Controller.',
+    lanes: [
+      lane('PROVISIONAMENTO DO NLB', 0),
+      lane('TRÁFEGO PÚBLICO', 1),
+      lane('APLICAÇÕES E DADOS', 2, 310),
+    ],
     nodes: [
-      p('cloudflare', 0, 260),
-      p('nlb', 280, 260),
-      p('gateway', 560, 260),
-      p('frontends', 880, 20),
-      p('go', 880, 260),
-      p('node', 880, 500),
-      p('postgres', 1190, 380),
-      p('lbservice', 560, 20),
-      p('ccm', 280, 20),
+      p('ccm', 340, 50),
+      p('lbservice', 680, 50),
+      p('cloudflare', 0, 280),
+      p('nlb', 340, 280),
+      p('gateway', 680, 280),
+      p('frontends', 0, 510),
+      p('go', 340, 510),
+      p('node', 680, 510),
+      p('postgres', 1020, 510),
     ],
     edges: [
       e('cloudflare', 'nlb', 'cyan'),
       e('nlb', 'gateway', 'cyan'),
-      e('gateway', 'frontends', 'cyan', '/'),
-      e('gateway', 'go', 'cyan', '/api/'),
+      e('gateway', 'frontends', 'cyan', '/', {
+        source: 'bottom',
+        target: 'top',
+        sourceOffset: -70,
+        targetOffset: 80,
+      }),
+      e('gateway', 'go', 'cyan', '/api/', { source: 'bottom', target: 'top' }),
       e('gateway', 'node', 'cyan', '/api/', {
         source: 'bottom',
-        target: 'left',
+        target: 'top',
+        sourceOffset: 70,
       }),
-      e('go', 'postgres', 'amber', undefined, { targetOffset: -18 }),
-      e('node', 'postgres', 'amber', undefined, { targetOffset: 18 }),
+      e('go', 'postgres', 'amber', undefined, {
+        source: 'bottom',
+        target: 'bottom',
+        targetOffset: 40,
+      }),
+      e('node', 'postgres', 'amber', undefined, {
+        source: 'bottom',
+        target: 'bottom',
+        targetOffset: -40,
+      }),
       e('gateway', 'lbservice', 'purple', undefined, {
         source: 'top',
         target: 'bottom',
@@ -541,25 +571,33 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     title: 'Do commit à produção.',
     description:
       'Uma versão percorre o pipeline até ser reconciliada pelo Argo CD.',
+    lanes: [
+      lane('INTEGRAÇÃO CONTÍNUA', 0),
+      lane('ESTADO DESEJADO E RECONCILIAÇÃO', 1),
+      lane('APLICAÇÕES', 2),
+    ],
     nodes: [
-      p('github', 0, 160),
-      p('registry', 330, 0),
-      p('updater', 680, 60),
-      p('gitops', 1010, 240),
-      p('argo', 680, 470),
-      p('apps', 320, 430),
+      p('github', 0, 50),
+      p('registry', 340, 50),
+      p('updater', 680, 50),
+      p('gitops', 680, 280),
+      p('argo', 340, 280),
+      p('apps', 340, 510),
     ],
     edges: [
       e('github', 'registry', 'purple', 'build'),
-      e('registry', 'updater', 'purple', 'nova imagem'),
-      e('updater', 'gitops', 'purple', 'commit'),
-      e('gitops', 'argo', 'purple', 'sync', {
+      e('registry', 'updater', 'purple', 'imagem'),
+      e('updater', 'gitops', 'purple', 'commit', {
         source: 'bottom',
+        target: 'top',
+      }),
+      e('gitops', 'argo', 'purple', 'sync', {
+        source: 'left',
         target: 'right',
       }),
       e('argo', 'apps', 'purple', 'rollout', {
-        source: 'left',
-        target: 'right',
+        source: 'bottom',
+        target: 'top',
       }),
     ],
   },
@@ -570,32 +608,43 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     title: 'Três sinais, um destino.',
     description:
       'O Collector reúne os sinais e o contexto. ClickHouse centraliza; Grafana explora.',
+    lanes: [
+      lane('ORIGEM DOS SINAIS', 0),
+      lane('COLETA E CONTEXTO', 1),
+      lane('ARMAZENAMENTO E EXPLORAÇÃO', 2),
+    ],
     nodes: [
-      p('go', 0, 0),
-      p('node', 0, 180),
-      p('infra', 0, 400),
-      p('metadata', 380, 480),
-      p('collector', 380, 190),
-      p('clickhouse', 750, 190),
-      p('grafana', 1100, 190),
-      p('keeper', 750, 450),
+      p('go', 0, 50),
+      p('node', 340, 50),
+      p('infra', 1020, 50),
+      p('metadata', 0, 280),
+      p('collector', 340, 280),
+      p('keeper', 0, 510),
+      p('clickhouse', 680, 510),
+      p('grafana', 1020, 510),
     ],
     edges: [
-      e('go', 'collector', 'green', undefined, { targetOffset: -23 }),
-      e('node', 'collector', 'green', 'OTLP'),
-      e('infra', 'collector', 'green', 'coleta', { targetOffset: 23 }),
-      e('metadata', 'collector', 'green', 'contexto', {
-        source: 'top',
-        target: 'bottom',
-        dashed: true,
+      e('go', 'collector', 'green', undefined, {
+        source: 'bottom',
+        target: 'top',
+        targetOffset: -50,
       }),
-      e('collector', 'clickhouse', 'green', '3 sinais'),
+      e('node', 'collector', 'green', 'OTLP', {
+        source: 'bottom',
+        target: 'top',
+        targetOffset: 50,
+      }),
+      e('infra', 'collector', 'green', 'coleta', {
+        source: 'bottom',
+        target: 'right',
+      }),
+      e('metadata', 'collector', 'green', 'contexto', { dashed: true }),
+      e('collector', 'clickhouse', 'green', '3 sinais', {
+        source: 'bottom',
+        target: 'top',
+      }),
       e('clickhouse', 'grafana', 'green', 'consultas'),
-      e('keeper', 'clickhouse', 'green', 'coordenação', {
-        source: 'top',
-        target: 'bottom',
-        dashed: true,
-      }),
+      e('keeper', 'clickhouse', 'green', 'coordenação', { dashed: true }),
     ],
   },
   {
@@ -605,34 +654,47 @@ export const INFRA_FLOWS: DiagramFlow[] = [
     title: 'A base que sustenta os produtos.',
     description:
       'Provisionamento, acesso privado e persistência ao redor do K3s.',
+    lanes: [
+      lane('PROVISIONAMENTO E ACESSO', 0),
+      lane('SERVIÇOS DA PLATAFORMA', 1),
+      lane('PERSISTÊNCIA', 2, 310),
+    ],
     nodes: [
-      p('terraform', 0, 70),
-      p('oci', 320, 0),
-      p('k3s', 660, 240),
-      p('warp', 660, 0),
+      p('terraform', 0, 50),
+      p('oci', 340, 50),
+      p('warp', 1020, 50),
       p('secrets', 0, 280),
-      p('tls', 320, 480),
-      p('longhorn', 660, 480),
-      p('clickhouse', 990, 350),
-      p('postgres', 990, 560),
+      p('k3s', 680, 280),
+      p('tls', 1020, 280),
+      p('longhorn', 340, 510),
+      p('clickhouse', 680, 510),
+      p('postgres', 1020, 510),
     ],
     edges: [
       e('terraform', 'oci', 'purple'),
-      e('oci', 'k3s', 'purple', 'bootstrap', { targetOffset: -23 }),
+      e('oci', 'k3s', 'purple', 'bootstrap', {
+        source: 'bottom',
+        target: 'top',
+        targetOffset: -50,
+      }),
       e('warp', 'k3s', 'purple', 'acesso privado', {
         source: 'bottom',
         target: 'top',
+        targetOffset: 50,
         dashed: true,
       }),
       e('secrets', 'k3s', 'purple', 'Secrets', { dashed: true }),
       e('tls', 'k3s', 'cyan', 'TLS + DNS', {
-        target: 'left',
-        targetOffset: 23,
+        source: 'left',
+        target: 'right',
         dashed: true,
       }),
       e('k3s', 'longhorn', 'amber', 'CSI', { source: 'bottom', target: 'top' }),
       e('longhorn', 'clickhouse', 'amber'),
-      e('longhorn', 'postgres', 'amber'),
+      e('longhorn', 'postgres', 'amber', undefined, {
+        source: 'bottom',
+        target: 'bottom',
+      }),
     ],
   },
 ]

@@ -108,9 +108,10 @@ export class ArchitectureDiagramComponent
           interacting: false,
           async: false,
         })
-        this.graph.on('node:click', ({ node }) =>
-          this.zone.run(() => this.selected.emit(node.id)),
-        )
+        this.graph.on('node:click', ({ node }) => {
+          if (INFRA_NODES.some((item) => item.id === node.id))
+            this.zone.run(() => this.selected.emit(node.id))
+        })
         this.graph.on('scale', ({ sx }) =>
           this.zone.run(() => {
             this.zoom = Math.round(sx * 100)
@@ -145,6 +146,49 @@ export class ArchitectureDiagramComponent
     const graph = this.graph
     if (!graph) return
     graph.clearCells()
+    const laneWidth = Math.max(...this.flow.nodes.map((node) => node.x)) + 312
+    this.flow.lanes.forEach((lane, index) =>
+      graph.addNode({
+        id: `lane-${index}`,
+        x: -20,
+        y: lane.y,
+        width: laneWidth,
+        height: lane.height || 190,
+        zIndex: 0,
+        markup: [
+          { tagName: 'rect', selector: 'body' },
+          { tagName: 'text', selector: 'label' },
+        ],
+        attrs: {
+          body: {
+            width: '100%',
+            height: '100%',
+            rx: 18,
+            fill: '#271c36',
+            fillOpacity: 0.45,
+            stroke: '#78608e',
+            strokeOpacity: 0.28,
+            strokeWidth: 1,
+            pointerEvents: 'none',
+          },
+          label: {
+            text: lane.label,
+            x: 20,
+            y: 24,
+            refX: 0,
+            refY: 0,
+            fontSize: 12,
+            fontWeight: 500,
+            letterSpacing: 1,
+            fontFamily: 'Poppins, sans-serif',
+            textAnchor: 'start',
+            fill: '#bfadcf',
+            pointerEvents: 'none',
+            'data-lane-label': lane.label,
+          },
+        },
+      }),
+    )
     this.flow.nodes.forEach((position) => {
       const item = INFRA_NODES.find((node) => node.id === position.id)!
       const color = COLORS[item.tone]
@@ -152,8 +196,8 @@ export class ArchitectureDiagramComponent
         id: item.id,
         x: position.x,
         y: position.y,
-        width: 224,
-        height: 88,
+        width: 272,
+        height: 100,
         zIndex: 2,
         markup: [
           { tagName: 'rect', selector: 'body' },
@@ -178,7 +222,7 @@ export class ArchitectureDiagramComponent
           },
           iconBg: {
             x: 14,
-            y: 23,
+            y: 29,
             width: 36,
             height: 40,
             rx: 11,
@@ -190,8 +234,8 @@ export class ArchitectureDiagramComponent
           icon: {
             text: item.mark,
             x: 32,
-            y: 43,
-            fontSize: 12,
+            y: 49,
+            fontSize: 14,
             fontWeight: 500,
             fontFamily: 'Poppins, sans-serif',
             refX: 0,
@@ -203,8 +247,8 @@ export class ArchitectureDiagramComponent
           title: {
             text: item.name,
             x: 64,
-            y: 32,
-            fontSize: 13,
+            y: 36,
+            fontSize: 17,
             fontWeight: 500,
             fontFamily: 'Poppins, sans-serif',
             refX: 0,
@@ -216,8 +260,8 @@ export class ArchitectureDiagramComponent
           subtitle: {
             text: item.subtitle,
             x: 64,
-            y: 54,
-            fontSize: 10,
+            y: 64,
+            fontSize: 13,
             fontFamily: 'Poppins, sans-serif',
             refX: 0,
             refY: 0,
@@ -267,7 +311,7 @@ export class ArchitectureDiagramComponent
                   label: {
                     text: edge.label,
                     fontFamily: 'Poppins, sans-serif',
-                    fontSize: 10,
+                    fontSize: 12,
                     fill: COLORS[edge.tone],
                   },
                   body: {
@@ -288,13 +332,21 @@ export class ArchitectureDiagramComponent
 
   private updateSelection(): void {
     this.graph?.getNodes().forEach((node) => {
-      const item = INFRA_NODES.find((item) => item.id === node.id)!
+      const item = INFRA_NODES.find((item) => item.id === node.id)
+      if (!item) return
       const active = node.id === this.selectedId
       node.attr('body/stroke', active ? COLORS[item.tone] : '#534260')
       node.attr('body/strokeWidth', active ? 1.8 : 1)
       node.attr('body/fill', active ? '#32253f' : '#261e34')
       node.attr('body/aria-pressed', String(active))
     })
+    if (this.stage.nativeElement.clientWidth < 600) {
+      const cell = this.graph?.getCellById(this.selectedId)
+      if (cell) {
+        this.graph?.zoomTo(Math.max(this.graph.zoom(), 1))
+        this.graph?.centerCell(cell)
+      }
+    }
   }
 
   onKeydown(event: KeyboardEvent): void {
@@ -308,7 +360,13 @@ export class ArchitectureDiagramComponent
 
   private scheduleFit(): void {
     cancelAnimationFrame(this.fitFrame)
-    this.fitFrame = requestAnimationFrame(() => this.fit())
+    this.fitFrame = requestAnimationFrame(() => {
+      if (this.stage.nativeElement.clientWidth < 600) {
+        this.graph?.zoomTo(1)
+        const cell = this.graph?.getCellById(this.selectedId)
+        if (cell) this.graph?.centerCell(cell)
+      } else this.fit()
+    })
   }
 
   fit(): void {
