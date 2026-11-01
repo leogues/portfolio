@@ -1,0 +1,244 @@
+% Adaptado em 2026-11-01 para Leonardo Rodrigues.
+% Alterações: conteúdo, fonte Unicode 11pt para XeTeX, entradas sem tabelas, resumo e duas páginas.
+% Origem: https://github.com/devcelio/resume-template
+% Compilar localmente: tectonic cv.tex
+% GitHub Repo and Documentation: https://github.com/celiobjunior/resume-template
+% Copyright © 2025 Celio B Junior. All rights reserved.
+% 
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+%
+%     http://www.apache.org/licenses/LICENSE-2.0
+%
+% This template follows best practices from README.md
+
+% Início do documento LaTeX: define tipo e formato do documento
+% a4paper = tamanho A4, 10pt = tamanho base da fonte
+\documentclass[a4paper,11pt]{article}
+
+% --- PACOTES: BASE / IDIOMA ---
+\usepackage{fontspec}
+\setmainfont{lmroman10-regular.otf}[
+  BoldFont=lmroman10-bold.otf,
+  ItalicFont=lmroman10-italic.otf,
+  BoldItalicFont=lmroman10-bolditalic.otf
+]
+\usepackage[portuguese]{babel}
+
+% --- PACOTES: LAYOUT / TIPOGRAFIA ---
+\usepackage{geometry}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{tabularx}
+
+% --- PACOTES: LINKS / BOOKMARKS ---
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{xurl}
+
+% --- CONFIGURAÇÃO: MARGENS / ESPAÇAMENTO ---
+\geometry{top=1.5cm, bottom=1.5cm, left=1.5cm, right=1.5cm} % Margens da página
+\setcounter{secnumdepth}{0}                                 % Remove numeração de seção
+\setlist[itemize]{
+    leftmargin=0.75em, % Recuo da lista (mais perto da margem da página)
+    itemsep=0.2em,     % Espaço entre itens
+    topsep=0.25em,     % Espaço antes/depois da lista
+    parsep=0em,        % Espaço entre parágrafos no mesmo item
+    partopsep=0em      % Espaço extra ao iniciar a lista
+}
+
+% Remove números de página e cabeçalhos para visual limpo do currículo
+\pagestyle{empty}
+
+% --- CONFIGURAÇÃO: METADADOS / LINKS ---
+\hypersetup{
+    pdftitle={Currículo Leonardo Rodrigues},   % Título do PDF
+    pdfauthor={Leonardo Rodrigues},     % Autor do PDF
+    colorlinks=true,          % Usa cor nos links (sem caixa)
+    linkcolor=black,          % Cor de links internos
+    urlcolor=black,           % Cor de URLs
+    citecolor=black,          % Cor de citações
+    bookmarksdepth=2          % Barra lateral: seção e subseção
+}
+
+% --- CONFIGURAÇÃO: TÍTULOS ---
+\titleformat{\section}
+{\Large\bfseries}
+{}
+{0em}
+{}
+[\titlerule\vspace{0.5ex}]
+\titleformat{\subsection}
+{\normalsize\bfseries}
+{}
+{0em}
+{}
+\titlespacing*{\subsection}{0pt}{0.35em}{0.15em}
+
+% Macro para entradas do currículo com bookmark no PDF
+\newcounter{cventry}
+% Entradas em fluxo textual para preservar a mesma ordem entre leitores de PDF.
+\newcommand{\cventry}[4]{%
+    \refstepcounter{cventry}%
+    \phantomsection%
+    \pdfbookmark[2]{#1}{cventry-\thecventry}%
+    \noindent\textbf{#1}\par
+    \if\relax\detokenize{#3}\relax\else
+      \noindent\textit{#3}\par
+    \fi
+    \if\relax\detokenize{#4}\relax
+      \if\relax\detokenize{#2}\relax\else\noindent\textit{#2}\par\fi
+    \else
+      \noindent\textit{#4}%
+      \if\relax\detokenize{#2}\relax\else\textit{ · #2}\fi\par
+    \fi
+}
+
+\begin{document}
+\begin{center}
+{\LARGE\textbf{Leonardo Rodrigues}}\\[0.1cm]
+\textbf{Desenvolvedor Back-end e Engenheiro de Dados Sênior}\\[0.1cm]
+
+            São Paulo, Brasil ·
+            \href{mailto:leo_rodrigues1999@hotmail.com}{leo\_rodrigues1999@hotmail.com}
+          \\[0.05cm]
+
+            \href{https://www.linkedin.com/in/leogues}{linkedin.com/in/leogues} ·
+            \href{https://github.com/leogues}{github.com/leogues} ·
+            \href{https://www.leogues.com}{leogues.com}
+          
+\end{center}
+\section{Resumo profissional}
+
+          Desenvolvedor back-end e engenheiro de dados sênior, com experiência desde 2020.
+          Atuação com Go, Node.js/TypeScript e Python em serviços distribuídos e pipelines
+          de analytics, com Kafka, ClickHouse e Dagster. Foco em performance,
+          confiabilidade e otimização de custos em ambientes GCP e AWS.
+        
+\section{Experiência profissional}
+\cventry{Nemu}{}{Engenheiro de software sênior}{setembro de 2024 – atual}
+
+            Arquitetura e evolução de sistemas distribuídos e plataformas de dados para
+            analytics e atribuição de marketing no e-commerce. A plataforma atende
+            marcas como Netshoes, WePink, C\&A, Logitech e Nestlé.
+          
+\begin{itemize}
+\item 
+              Reduzi em aproximadamente \textbf{90\% o uso de memória do Redis},
+              de 50 GB para 5,5 GB, com compressão ZSTD.
+            
+\item 
+              Simplifiquei pipelines com ClickHouse, acelerando a ingestão e o
+              processamento, com consultas analíticas
+              \textbf{até 60 vezes mais rápidas} em comparação ao MySQL.
+            
+\item 
+              Migrei \textbf{bilhões de registros} do MySQL para o ClickHouse
+              com ferramenta interna em Go, leitura paralela por faixas lexicográficas
+              e escrita de aproximadamente \textbf{700 mil registros por segundo}.
+              Implementei a sincronização contínua de novos dados e alterações via CDC
+              e Kafka, utilizando ReplacingMergeTree para consolidar versões dos registros.
+            
+\item 
+              Redução de até 30\% nos gastos totais com otimizações pontuais de FinOps.
+            
+\item 
+              Reduzi em aproximadamente \textbf{95\% o armazenamento analítico},
+              de 18,1 TB para 910 GB, com compressão nativa do ClickHouse. A menor demanda
+              de IOPS e banda também permitiu adotar discos mais econômicos.
+            
+\item 
+              Desenvolvi e operei pipelines e serviços com Dagster (Python),
+              ClickHouse, Kafka e Node.js/TypeScript na GCP, com GKE, MySQL e Memorystore
+              (Redis), infraestrutura como código e entrega contínua via GitOps (Argo CD).
+            
+\item 
+              Implantei e operei ClickHouse e Kafka no GKE, com replicação
+              multi-AZ, réplicas em nós distintos, backups, alertas e dashboards.
+            
+\item 
+              Investiguei falhas e otimizei a performance de serviços com profiling,
+              análise de planos de execução, logs, métricas e traces da stack LGTM
+              (Loki, Grafana, Tempo e Mimir/Prometheus).
+            
+\end{itemize}
+\newpage
+\section{Experiência profissional — continuação}
+\cventry{Engenheiro de software}{São Paulo, Brasil}{}{novembro de 2020 – setembro de 2024}
+\begin{itemize}
+\item 
+              Desenvolvi e aprimorei aplicações back-end em Node.js, com
+              melhoria da arquitetura, qualidade de código e facilidade de manutenção.
+            
+\item 
+              Identifiquei gargalos e otimizei a eficiência das aplicações com
+              profiling.
+            
+\item 
+              Configurei e operei infraestrutura na AWS: EKS, ECS/Fargate,
+              API Gateway, balanceadores de carga, VPC, subnets, rotas e gateways.
+            
+\item 
+              Configurei e mantive PostgreSQL e MySQL no Amazon RDS, além de
+              MongoDB. Implementei e aprimorei pipelines de integração e entrega
+              contínua (CI/CD).
+            
+\end{itemize}
+\cventry{TM Shop}{São Paulo, Brasil}{Sociedade e-commerce}{fevereiro de 2022 – novembro de 2023}
+\begin{itemize}
+\item 
+              Desenvolvi e mantive integrações com o ERP Bling e criei
+              ferramentas internas para apoiar as operações da equipe.
+            
+\item 
+              Levantei requisitos e implementei automações para reduzir
+              tarefas manuais, padronizar rotinas e melhorar processos internos.
+            
+\item 
+              Organizei informações de produtos para apoiar a criação de anúncios
+              e as operações comerciais.
+            
+\end{itemize}
+\section{Competências técnicas}
+\textbf{Back-end:} Go (Golang), Node.js, TypeScript, NestJS e Python.\par
+
+            \textbf{Dados e mensageria:} ClickHouse, Apache Kafka, Dagster,
+            PostgreSQL, MySQL, MongoDB, Redis, CDC e modelagem analítica.
+          \par
+
+            \textbf{Google Cloud (GCP):} GKE, Cloud SQL (MySQL e PostgreSQL), Memorystore
+            (Redis), Cloud Storage, Artifact Registry, IAM, Secret Manager e Cloud KMS.
+          \par
+
+            \textbf{GKE e Kubernetes:} clusters regionais, node pools,
+            autoscaling, nós Spot, Workload Identity, Docker, serviços,
+            Ingress/Gateway API e volumes persistentes.
+          \par
+
+            \textbf{Redes na GCP:} VPC, sub-redes, rotas, regras de firewall,
+            Cloud NAT, VPC Peering, Cloud DNS e balanceamento de carga.
+          \par
+
+            \textbf{AWS:} EKS, ECS/Fargate, RDS (PostgreSQL e MySQL),
+            API Gateway, VPC, sub-redes, rotas e balanceadores de carga.
+          \par
+
+            \textbf{Infraestrutura como código e entrega:} Terraform/OpenTofu,
+            Terragrunt, Helm, Argo CD, GitOps e CI/CD.
+          \par
+
+            \textbf{Observabilidade:} Grafana, Loki, Tempo, Mimir, Prometheus,
+            profiling, análise de planos de execução e testes de carga.
+          \par
+
+            \textbf{Arquitetura e qualidade:} sistemas orientados a eventos,
+            idempotência, Clean Architecture, DDD, TDD e testes unitários, de integração
+            e de contrato.
+          \par
+\section{Formação acadêmica}
+\cventry{Centro Universitário de Rio Preto}{}{Engenharia da Computação}{}
+\end{document}
